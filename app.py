@@ -45,7 +45,7 @@ async def chat(request: ChatRequest):
             ]
         )
         
-        # 提取响应文本
+        # 提取响应文本，
         # 输出格式: [ResponseReasoningItem, ResponseOutputMessage]
         # ResponseOutputMessage.content 是一个列表，包含 ResponseOutputText 对象
         answer = ""
