@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        input {
+            padding: 10px;
+            width: 100%;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>豆包AI助手 - 功能测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 视频链接测试</h2>
+        <input type="text" id="videoUrl" placeholder="输入视频链接（B站/YouTube）或直链URL">
+        <div style="margin-top: 10px;">
+            <button onclick="loadVideo()">加载视频</button>
+            <button onclick="parseVideoUrl()" style="background: #4CAF50; color: white;">🔄 自动解析</button>
+            <button onclick="showParseHelp()" style="background: #ff9800; color: white;">📖 如何获取直链</button>
+        </div>
+        <div id="parseStatus" style="margin-top: 10px; color: #666;"></div>
+        <div id="videoStatus"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 视频分析测试</h2>
+        <input type="text" id="question" placeholder="输入你想问的问题">
+        <button id="analyzeBtn" onclick="analyzeVideo()" disabled>分析视频</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 关键词检测测试</h2>
+        <input type="text" id="keywords" placeholder="输入关键词（用逗号分隔）">
+        <button id="detectBtn" onclick="detectKeywords()" disabled>检测关键词</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>结果</h2>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let selectedVideoUrl = null;
+        
+        function log(message) {
+            const result = document.getElementById('result');
+            result.textContent += message + '\n';
+            console.log(message);
+        }
+        
+        function loadVideo() {
+            const url = document.getElementById('videoUrl').value.trim();
+            if (!url) {
+                alert('请输入视频链接');
+                return;
+            }
+            
+            selectedVideoUrl = url;
+            document.getElementById('videoStatus').textContent = '✅ 视频链接已加载: ' + url;
+            document.getElementById('analyzeBtn').disabled = false;
+            
+            // 检查关键词输入，启用检测按钮
+            checkKeywords();
+            log('视频链接已加载: ' + url);
+        }
+        
+        function checkKeywords() {
+            const keywords = document.getElementById('keywords').value.trim();
+            const detectBtn = document.getElementById('detectBtn');
+            detectBtn.disabled = !selectedVideoUrl || !keywords;
+        }
+        
+        // 监听关键词输入
+        document.getElementById('keywords').addEventListener('input', checkKeywords);
+        
+        async function analyzeVideo() {
+            log('=== 开始分析视频 ===');
+            log('视频链接: ' + selectedVideoUrl);
+            
+            if (!selectedVideoUrl) {
+                alert('请先加载视频');
+                return;
+            }
+            
+            const question = document.getElementById('question').value.trim();
+            if (!question) {
+                alert('请输入问题');
+                return;
+            }
+            
+            log('问题: ' + question);
+            
+            try {
+                log('正在发送请求...');
+                const response = await fetch('/api/analyze-video', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: question,
+                        video_url: selectedVideoUrl 
+                    })
+                });
+                
+                log('响应状态: ' + response.status);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || '视频分析失败');
+                }
+                
+                const data = await response.json();
+                log('=== 分析结果 ===');
+                log(data.response);
+            } catch (error) {
+                log('❌ 错误: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+        
+        async function detectKeywords() {
+            log('=== 开始检测关键词 ===');
+            log('视频链接: ' + selectedVideoUrl);
+            
+            if (!selectedVideoUrl) {
+                alert('请先加载视频');
+                return;
+            }
+            
+            const keywordsText = document.getElementById('keywords').value.trim();
+            if (!keywordsText) {
+                alert('请输入关键词');
+                return;
+            }
+            
+            const keywords = keywordsText.split(',').map(k => k.trim()).filter(k => k);
+            log('关键词: ' + keywords.join(', '));
+            
+            try {
+                log('正在发送请求...');
+                const response = await fetch('/api/detect-keywords', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        keywords: keywords,
+                        video_url: selectedVideoUrl 
+                    })
+                });
+                
+                log('响应状态: ' + response.status);
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || '关键词检测失败');
+                }
+                
+                const data = await response.json();
+                log('=== 检测结果 ===');
+                log(JSON.stringify(data, null, 2));
+            } catch (error) {
+                log('❌ 错误: ' + error.message);
+                console.error('Error:', error);
+            }
+        }
+        
+        log('页面加载完成，准备测试');
+
+        async function parseVideoUrl() {
+            const url = document.getElementById('videoUrl').value.trim();
+            if (!url) {
+                alert('请输入视频链接');
+                return;
+            }
+
+            const parseStatus = document.getElementById('parseStatus');
+            parseStatus.textContent = '🔄 正在解析视频链接...';
+
+            try {
+                const response = await fetch('/api/parse-video-url', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    parseStatus.innerHTML = `<span style="color: red;">❌ ${data.error}</span>`;
+                    if (data.install_command) {
+                        parseStatus.innerHTML += `<br><br>安装命令：<code>${data.install_command}</code>`;
+                    }
+                    if (data.alternative) {
+                        parseStatus.innerHTML += `<br><br>${data.alternative.replace(/\n/g, '<br>')}`;
+                    }
+                } else if (data.direct_url) {
+                    parseStatus.innerHTML = `<span style="color: green;">✅ 解析成功！平台: ${data.platform}</span>`;
+                    document.getElementById('videoUrl').value = data.direct_url;
+                    log('视频链接已自动解析: ' + data.direct_url.substring(0, 100) + '...');
+
+                    // 自动加载视频
+                    loadVideo();
+                }
+            } catch (error) {
+                parseStatus.innerHTML = `<span style="color: red;">❌ 解析失败: ${error.message}</span>`;
+                console.error('Error:', error);
+            }
+        }
+
+        function showParseHelp() {
+            const helpText = `📖 如何获取视频直链URL
+
+═══════════════════════════════════════
+
+【B站视频】
+方法1：在线解析网站
+• https://bilibili.iiilab.com/
+• https://www.xbeibeix.com/api/bilibili/
+
+步骤：
+1. 复制B站视频链接（如 https://www.bilibili.com/video/BV1xx411c7mD）
+2. 打开解析网站，粘贴链接
+3. 选择清晰度，点击解析
+4. 复制生成的 .mp4 或 .flv 链接
+
+方法2：使用Python工具
+• 安装: pip install you-get
+• 运行: you-get -i 'B站链接'
+• 查看输出的视频URL
+
+═══════════════════════════════════════
+
+【YouTube视频】
+方法1：在线解析网站
+• https://www.y2mate.com/
+• https://savefrom.net/
+
+步骤：
+1. 复制YouTube链接
+2. 打开解析网站，粘贴链接
+3. 选择格式和清晰度
+4. 复制生成的下载链接
+
+方法2：使用Python工具
+• 安装: pip install yt-dlp
+• 运行: yt-dlp -f best --get-url 'YouTube链接'
+
+═══════════════════════════════════════
+
+【测试用直链】
+官方测试视频：
+https://ark-project.tos-cn-beijing.volces.com/doc_video/r2v_tea_video1.mp4
+
+═══════════════════════════════════════
+
+【注意事项】
+• 确保视频URL以 .mp4, .webm, .avi 等结尾
+• 视频大小建议 < 100MB
+• 某些平台可能有防盗链，需要特殊处理
+• 请遵守版权法规，仅用于学习研究`;
+
+            alert(helpText);
+        }
+    </script>
+</body>
+</html>
