@@ -277,6 +277,9 @@
                 <button id="detectKeywordsBtn" class="analyze-video-btn" onclick="showKeywordSection()" style="background: #17a2b8;">
                     🔎 检测关键词
                 </button>
+                <button id="reviewVideoBtn" class="analyze-video-btn" onclick="showReviewSection()" style="background: #ffc107; color: #333;">
+                    📋 合规检测
+                </button>
             </div>
             
             <!-- 关键词检测区域 -->
@@ -302,6 +305,22 @@
                     🚀 开始检测
                 </button>
                 <button onclick="hideKeywordSection()" style="margin-left: 10px; padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">收起</button>
+            </div>
+            
+            <!-- 视频合规检测区域 -->
+            <div id="reviewSection" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeeba;">
+                <div style="margin-bottom: 10px; font-weight: bold; color: #856404;">📋 视频合规检测</div>
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 13px; color: #666; display: block; margin-bottom: 5px;">
+                        输入检测要求（描述视频需要满足的条件）：
+                    </label>
+                    <textarea id="reviewRequirements" placeholder="例如: 视频内容必须包含产品介绍，时长不少于30秒，不能有敏感内容，需要清晰展示产品使用方法..." 
+                              style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; min-height: 100px; resize: vertical;"></textarea>
+                </div>
+                <button id="startReviewBtn" class="analyze-video-btn" onclick="reviewVideo()" disabled style="background: #17a2b8;">
+                    ✅ 开始检测
+                </button>
+                <button onclick="hideReviewSection()" style="margin-left: 10px; padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">收起</button>
             </div>
             
             <!-- 已选择视频信息 -->
@@ -340,6 +359,8 @@
         let selectedVideo = null;
         const keywordInput = document.getElementById('keywordInput');
         const startDetectBtn = document.getElementById('startDetectBtn');
+        const reviewRequirements = document.getElementById('reviewRequirements');
+        const startReviewBtn = document.getElementById('startReviewBtn');
 
         function showKeywordSection() {
             const section = document.getElementById('keywordSection');
@@ -352,6 +373,19 @@
 
         function hideKeywordSection() {
             document.getElementById('keywordSection').style.display = 'none';
+        }
+
+        function showReviewSection() {
+            const section = document.getElementById('reviewSection');
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        }
+
+        function hideReviewSection() {
+            document.getElementById('reviewSection').style.display = 'none';
         }
 
         function addPresetKeyword(keyword) {
@@ -374,8 +408,15 @@
             startDetectBtn.disabled = !selectedVideo || !keywords;
         }
 
+        function updateReviewButton() {
+            const requirements = reviewRequirements.value.trim();
+            startReviewBtn.disabled = !selectedVideo || !requirements;
+        }
+
         // 监听关键词输入变化
         keywordInput.addEventListener('input', updateDetectButton);
+        // 监听合规检测要求输入变化
+        reviewRequirements.addEventListener('input', updateReviewButton);
 
         async function detectKeywords() {
             if (!selectedVideo) {
@@ -434,8 +475,10 @@
 
                 clearTimeout(timeoutId);
 
-                // 移除加载状态
-                chatMessages.removeChild(loadingDiv);
+                // 移除加载状态（检查元素是否存在）
+                if (chatMessages.contains(loadingDiv)) {
+                    chatMessages.removeChild(loadingDiv);
+                }
 
                 if (!response.ok) {
                     let errorData;
@@ -501,6 +544,7 @@
                 selectedVideoInfo.style.display = 'block';
                 
                 updateDetectButton(); // 更新关键词检测按钮状态
+                updateReviewButton(); // 更新合规检测按钮状态
             }
         }
 
@@ -509,6 +553,120 @@
             selectedVideoInfo.style.display = 'none';
             videoInput.value = '';
             updateDetectButton(); // 更新关键词检测按钮状态
+            updateReviewButton(); // 更新合规检测按钮状态
+        }
+
+        async function reviewVideo() {
+            if (!selectedVideo) {
+                alert('请先选择视频');
+                return;
+            }
+
+            const requirements = reviewRequirements.value.trim();
+            if (!requirements) {
+                alert('请输入检测要求');
+                return;
+            }
+
+            // 显示用户消息
+            addMessage(`[视频合规检测]\n检测要求: ${requirements}`, 'user');
+
+            // 添加加载状态
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message bot';
+            loadingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                    <div id="progress-text">正在上传视频并分析...</div>
+                </div>
+            `;
+            chatMessages.appendChild(loadingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const formData = new FormData();
+                formData.append('requirements', requirements);
+                formData.append('video', selectedVideo);
+
+                // 创建带超时的请求
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                }, 300000); // 5分钟超时
+
+                const response = await fetch('/api/review-video', {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                // 移除加载状态（检查元素是否存在）
+                if (chatMessages.contains(loadingDiv)) {
+                    chatMessages.removeChild(loadingDiv);
+                }
+
+                if (!response.ok) {
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                    } catch {
+                        errorData = { detail: `HTTP错误: ${response.status}` };
+                    }
+                    throw new Error(errorData.detail || '视频检测失败');
+                }
+
+                const data = await response.json();
+                
+                // 格式化结果
+                let resultMessage = '';
+                if (data.pass) {
+                    resultMessage = `✅ 通过\n\n`;
+                    resultMessage += `评估结果: ${data.result}\n\n`;
+                    if (data.reasons && data.reasons.length > 0) {
+                        resultMessage += `符合要求的理由:\n`;
+                        data.reasons.forEach((reason, index) => {
+                            resultMessage += `${index + 1}. ${reason}\n`;
+                        });
+                    }
+                } else {
+                    resultMessage = `❌ 不通过\n\n`;
+                    resultMessage += `评估结果: ${data.result}\n\n`;
+                    if (data.issues && data.issues.length > 0) {
+                        resultMessage += `不符合要求的问题:\n`;
+                        data.issues.forEach((issue, index) => {
+                            resultMessage += `${index + 1}. ${issue}\n`;
+                        });
+                    }
+                }
+                
+                addMessage(resultMessage, 'bot');
+            } catch (error) {
+                // 移除加载状态（检查元素是否存在）
+                try {
+                    if (loadingDiv.parentNode === chatMessages) {
+                        chatMessages.removeChild(loadingDiv);
+                    }
+                } catch (e) {
+                    console.warn('加载状态已移除');
+                }
+                
+                let errorMsg = error.message;
+                if (error.name === 'AbortError') {
+                    errorMsg = '请求超时，请尝试使用较短的视频';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMsg = '服务器连接失败，请检查网络或重试';
+                }
+                
+                addMessage(`视频检测错误: ${errorMsg}`, 'bot');
+                console.error('Error:', error);
+            }
         }
 
         async function sendMessage() {
