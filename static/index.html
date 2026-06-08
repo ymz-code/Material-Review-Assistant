@@ -80,39 +80,6 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .video-preview {
-            display: none;
-            margin-top: 10px;
-        }
-
-        .video-preview.active {
-            display: block;
-        }
-
-        .video-preview video {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .video-info {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #666;
-        }
-
-        .remove-video-btn {
-            padding: 5px 15px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-top: 10px;
-        }
-
         .analyze-video-btn {
             padding: 10px 20px;
             background: #28a745;
@@ -292,86 +259,6 @@
                 max-width: 85%;
             }
         }
-
-        /* 自定义模态对话框样式 */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-        
-        .modal-dialog {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 90%;
-        }
-        
-        .modal-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .modal-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            box-sizing: border-box;
-        }
-        
-        .modal-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        
-        .modal-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .modal-btn-cancel {
-            background: #e0e0e0;
-            color: #666;
-        }
-        
-        .modal-btn-cancel:hover {
-            background: #d0d0d0;
-        }
-        
-        .modal-btn-confirm {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .modal-btn-confirm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
     </style>
 </head>
 <body>
@@ -383,27 +270,13 @@
         
         <div class="video-upload-section">
             <div class="upload-controls">
-                <input type="text" id="videoUrlInput" placeholder="🔗 输入视频网页链接（如B站、爱奇艺等）" 
-                       style="flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;"
-                       oninput="handleVideoUrlInput(event)">
-                <button id="loadVideoBtn" class="upload-btn" onclick="loadVideoFromUrl()" style="background: #007bff;">
-                    📡 加载视频
+                <button class="upload-btn" onclick="document.getElementById('videoInput').click()">
+                    📹 上传视频
                 </button>
-                <button id="analyzeVideoBtn" class="analyze-video-btn" onclick="analyzeVideo()" disabled>
-                    🔍 分析视频
-                </button>
+                <input type="file" id="videoInput" accept="video/*" style="display: none" onchange="handleVideoSelect(event)">
                 <button id="detectKeywordsBtn" class="analyze-video-btn" onclick="showKeywordSection()" style="background: #17a2b8;">
                     🔎 检测关键词
                 </button>
-            </div>
-            
-            <!-- 视频预览 -->
-            <div class="video-preview" id="videoPreview">
-                <div id="videoEmbedContainer" style="background: #000; min-height: 400px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                    <p style="color: #999; font-size: 14px;">请输入视频链接加载预览</p>
-                </div>
-                <div class="video-info" id="videoInfo"></div>
-                <button class="remove-video-btn" onclick="removeVideo()">清除视频</button>
             </div>
             
             <!-- 关键词检测区域 -->
@@ -430,6 +303,12 @@
                 </button>
                 <button onclick="hideKeywordSection()" style="margin-left: 10px; padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">收起</button>
             </div>
+            
+            <!-- 已选择视频信息 -->
+            <div id="selectedVideoInfo" style="display: none; margin-top: 15px; padding: 10px; background: #d4edda; border-radius: 8px; color: #155724;">
+                <span id="videoName"></span>
+                <button onclick="clearVideo()" style="margin-left: 10px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">清除</button>
+            </div>
         </div>
         
         <div class="chat-messages" id="chatMessages">
@@ -448,108 +327,19 @@
         </div>
     </div>
 
-    <!-- 自定义模态对话框 -->
-    <div id="modalOverlay" class="modal-overlay">
-        <div class="modal-dialog">
-            <div class="modal-title" id="modalTitle">请输入</div>
-            <input type="text" class="modal-input" id="modalInput" placeholder="">
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-cancel" onclick="closeModal()">取消</button>
-                <button class="modal-btn modal-btn-confirm" onclick="confirmModal()">确定</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // 全局变量
-        let chatMessages, messageInput, sendBtn, btnText, btnLoading;
-        let videoUrlInput, loadVideoBtn, videoPreview, videoInfo, analyzeVideoBtn, videoEmbedContainer;
-        let selectedVideoUrl = null;
-        let keywordInput, startDetectBtn;
-        let modalCallback = null;
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoading = document.getElementById('btnLoading');
+        const videoInput = document.getElementById('videoInput');
+        const selectedVideoInfo = document.getElementById('selectedVideoInfo');
+        const videoName = document.getElementById('videoName');
 
-        // 自定义模态对话框函数
-        function showModal(title, placeholder, defaultValue, callback) {
-            const modalOverlay = document.getElementById('modalOverlay');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalInput = document.getElementById('modalInput');
-            
-            modalTitle.textContent = title;
-            modalInput.placeholder = placeholder;
-            modalInput.value = defaultValue || '';
-            
-            modalOverlay.style.display = 'flex';
-            modalInput.focus();
-            
-            modalCallback = callback;
-        }
-
-        function closeModal() {
-            const modalOverlay = document.getElementById('modalOverlay');
-            modalOverlay.style.display = 'none';
-            modalCallback = null;
-        }
-
-        function confirmModal() {
-            const modalInput = document.getElementById('modalInput');
-            const value = modalInput.value.trim();
-            
-            closeModal();
-            
-            if (modalCallback && value) {
-                modalCallback(value);
-            }
-        }
-
-        // 按Enter键确认
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                const modalOverlay = document.getElementById('modalOverlay');
-                if (modalOverlay.style.display === 'flex') {
-                    confirmModal();
-                }
-            }
-        });
-
-        // 初始化函数
-        function initializeApp() {
-            console.log('Initializing app...');
-            
-            // 获取DOM元素
-            chatMessages = document.getElementById('chatMessages');
-            messageInput = document.getElementById('messageInput');
-            sendBtn = document.getElementById('sendBtn');
-            btnText = document.getElementById('btnText');
-            btnLoading = document.getElementById('btnLoading');
-            videoUrlInput = document.getElementById('videoUrlInput');
-            loadVideoBtn = document.getElementById('loadVideoBtn');
-            videoPreview = document.getElementById('videoPreview');
-            videoInfo = document.getElementById('videoInfo');
-            analyzeVideoBtn = document.getElementById('analyzeVideoBtn');
-            videoEmbedContainer = document.getElementById('videoEmbedContainer');
-            keywordInput = document.getElementById('keywordInput');
-            startDetectBtn = document.getElementById('startDetectBtn');
-
-            console.log('DOM elements loaded:', {
-                keywordInput: !!keywordInput,
-                startDetectBtn: !!startDetectBtn,
-                videoUrlInput: !!videoUrlInput
-            });
-
-            // 添加事件监听器
-            if (keywordInput) {
-                keywordInput.addEventListener('input', function(event) {
-                    console.log('keywordInput changed:', event.target.value);
-                    console.log('selectedVideoUrl:', selectedVideoUrl);
-                    updateDetectButton();
-                });
-            }
-
-            console.log('App initialized successfully');
-        }
-
-        // DOM加载完成后初始化
-        document.addEventListener('DOMContentLoaded', initializeApp);
+        let selectedVideo = null;
+        const keywordInput = document.getElementById('keywordInput');
+        const startDetectBtn = document.getElementById('startDetectBtn');
 
         function showKeywordSection() {
             const section = document.getElementById('keywordSection');
@@ -581,218 +371,15 @@
 
         function updateDetectButton() {
             const keywords = keywordInput.value.trim();
-            const isDisabled = !selectedVideoUrl || !keywords;
-            startDetectBtn.disabled = isDisabled;
-            
-            // 调试信息
-            console.log('updateDetectButton:', {
-                selectedVideoUrl: !!selectedVideoUrl,
-                hasKeywords: !!keywords,
-                isDisabled: isDisabled
-            });
+            startDetectBtn.disabled = !selectedVideo || !keywords;
         }
 
-        function handleVideoUrlInput(event) {
-            const url = event.target.value.trim();
-            if (url) {
-                loadVideoBtn.disabled = false;
-            } else {
-                loadVideoBtn.disabled = true;
-            }
-        }
-
-        function loadVideoFromUrl() {
-            console.log('loadVideoFromUrl called!');
-            
-            const url = videoUrlInput.value.trim();
-            if (!url) {
-                alert('请输入视频链接');
-                return;
-            }
-
-            // 简单验证URL格式
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                alert('请输入有效的URL（以http://或https://开头）');
-                return;
-            }
-
-            selectedVideoUrl = url;
-            console.log('selectedVideoUrl set to:', selectedVideoUrl);
-            videoPreview.classList.add('active');
-            
-            // 根据URL类型生成嵌入代码
-            let embedHtml = '';
-            
-            if (url.includes('bilibili.com') || url.includes('b23.tv')) {
-                // B站视频
-                const videoId = extractBilibiliId(url);
-                if (videoId) {
-                    embedHtml = `<iframe src="https://player.bilibili.com/player.html?bvid=${videoId}&page=1" 
-                                    scrolling="no" frameborder="0" 
-                                    style="width: 100%; height: 100%;" 
-                                    allowfullscreen="true"></iframe>`;
-                } else {
-                    embedHtml = `<p style="color: #ff6b6b;">无法解析B站视频链接</p>`;
-                }
-            } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                // YouTube视频
-                const videoId = extractYouTubeId(url);
-                if (videoId) {
-                    embedHtml = `<iframe src="https://www.youtube.com/embed/${videoId}" 
-                                    frameborder="0" 
-                                    style="width: 100%; height: 100%;" 
-                                    allowfullscreen="true"></iframe>`;
-                } else {
-                    embedHtml = `<p style="color: #ff6b6b;">无法解析YouTube视频链接</p>`;
-                }
-            } else {
-                // 通用链接，显示提示
-                embedHtml = `<div style="text-align: center; padding: 20px;">
-                    <p style="color: #17a2b8; font-size: 16px;">📹 视频链接已加载</p>
-                    <p style="color: #999; font-size: 14px; margin-top: 10px;">${url}</p>
-                    <p style="color: #666; font-size: 12px; margin-top: 15px;">💡 支持B站、YouTube等主流视频平台</p>
-                </div>`;
-            }
-            
-            videoEmbedContainer.innerHTML = embedHtml;
-            videoInfo.textContent = `视频来源: ${getDomainName(url)}`;
-            
-            analyzeVideoBtn.disabled = false;
-            console.log('Calling updateDetectButton after loading video...');
-            updateDetectButton();
-            console.log('After updateDetectButton - startDetectBtn.disabled:', startDetectBtn.disabled);
-        }
-
-        function extractBilibiliId(url) {
-            // B站链接格式：https://www.bilibili.com/video/BV1xx411c7mD 或 https://b23.tv/xxx
-            let match = url.match(/BV[\w]+/);
-            if (match) return match[0];
-            
-            // 短链接解析
-            if (url.includes('b23.tv')) {
-                // 需要服务器端解析，这里简化处理
-                return null;
-            }
-            return null;
-        }
-
-        function extractYouTubeId(url) {
-            // YouTube链接格式
-            const patterns = [
-                /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
-                /youtube\.com\/shorts\/([^&\n?#]+)/
-            ];
-            
-            for (const pattern of patterns) {
-                const match = url.match(pattern);
-                if (match) return match[1];
-            }
-            return null;
-        }
-
-        function getDomainName(url) {
-            try {
-                const domain = new URL(url).hostname;
-                if (domain.includes('bilibili')) return '哔哩哔哩';
-                if (domain.includes('youtube')) return 'YouTube';
-                if (domain.includes('iqiyi')) return '爱奇艺';
-                if (domain.includes('qq.com')) return '腾讯视频';
-                if (domain.includes('youku')) return '优酷';
-                return domain;
-            } catch {
-                return '未知来源';
-            }
-        }
-
-        function removeVideo() {
-            selectedVideoUrl = null;
-            videoUrlInput.value = '';
-            videoEmbedContainer.innerHTML = '<p style="color: #999; font-size: 14px;">请输入视频链接加载预览</p>';
-            videoPreview.classList.remove('active');
-            videoInfo.textContent = '';
-            analyzeVideoBtn.disabled = true;
-            loadVideoBtn.disabled = true;
-        }
-
-        async function analyzeVideo() {
-            if (!selectedVideoUrl) {
-                alert('请先输入视频链接');
-                return;
-            }
-
-            // 使用自定义模态对话框
-            showModal(
-                '视频分析',
-                '请输入你想问关于这个视频的问题',
-                '请描述这个视频的内容',
-                function(message) {
-                    if (!message) return;
-                    
-                    // 显示用户消息
-                    addMessage(`[视频分析请求]\n视频链接: ${selectedVideoUrl}\n问题: ${message}`, 'user');
-
-                    // 添加加载状态
-                    const loadingDiv = document.createElement('div');
-                    loadingDiv.className = 'message bot';
-                    loadingDiv.innerHTML = `
-                        <div class="message-avatar">🤖</div>
-                        <div class="message-content">
-                            <div class="typing-indicator">
-                                <div class="typing-dot"></div>
-                                <div class="typing-dot"></div>
-                                <div class="typing-dot"></div>
-                            </div>
-                            正在分析视频...
-                        </div>
-                    `;
-                    chatMessages.appendChild(loadingDiv);
-                    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                    // 发送请求
-                    fetch('/api/analyze-video', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ 
-                            message: message,
-                            video_url: selectedVideoUrl 
-                        })
-                    })
-                    .then(response => {
-                        // 移除加载状态
-                        chatMessages.removeChild(loadingDiv);
-                        
-                        if (!response.ok) {
-                            return response.json().then(errorData => {
-                                throw new Error(errorData.detail || '视频分析失败');
-                            });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        addMessage(data.response, 'bot');
-                    })
-                    .catch(error => {
-                        // 移除加载状态
-                        if (chatMessages.contains(loadingDiv)) {
-                            chatMessages.removeChild(loadingDiv);
-                        }
-                        addMessage(`视频分析错误: ${error.message}`, 'bot');
-                        console.error('Error:', error);
-                    });
-                }
-            );
-        }
+        // 监听关键词输入变化
+        keywordInput.addEventListener('input', updateDetectButton);
 
         async function detectKeywords() {
-            console.log('detectKeywords called!', {
-                selectedVideoUrl: selectedVideoUrl,
-                keywords: keywordInput.value.trim()
-            });
-            
-            if (!selectedVideoUrl) {
-                alert('请先输入视频链接');
+            if (!selectedVideo) {
+                alert('请先选择视频');
                 return;
             }
 
@@ -809,7 +396,7 @@
             }
 
             // 显示用户消息
-            addMessage(`[关键词检测]\n视频链接: ${selectedVideoUrl}\n检测词汇: ${keywords.join(', ')}`, 'user');
+            addMessage(`[关键词检测]\n检测词汇: ${keywords.join(', ')}`, 'user');
 
             // 添加加载状态
             const loadingDiv = document.createElement('div');
@@ -822,29 +409,41 @@
                         <div class="typing-dot"></div>
                         <div class="typing-dot"></div>
                     </div>
-                    正在检测关键词...
+                    <div id="progress-text">正在上传视频...</div>
                 </div>
             `;
             chatMessages.appendChild(loadingDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
             try {
+                const formData = new FormData();
+                formData.append('keywords', JSON.stringify(keywords));
+                formData.append('video', selectedVideo);
+
+                // 创建带超时的请求
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                }, 300000); // 5分钟超时
+
                 const response = await fetch('/api/detect-keywords', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                        keywords: keywords,
-                        video_url: selectedVideoUrl 
-                    })
+                    body: formData,
+                    signal: controller.signal
                 });
+
+                clearTimeout(timeoutId);
 
                 // 移除加载状态
                 chatMessages.removeChild(loadingDiv);
 
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                    } catch {
+                        errorData = { detail: `HTTP错误: ${response.status}` };
+                    }
                     throw new Error(errorData.detail || '关键词检测失败');
                 }
 
@@ -878,9 +477,38 @@
                 if (chatMessages.contains(loadingDiv)) {
                     chatMessages.removeChild(loadingDiv);
                 }
-                addMessage(`关键词检测错误: ${error.message}`, 'bot');
+                
+                let errorMsg = error.message;
+                if (error.name === 'AbortError') {
+                    errorMsg = '请求超时，请尝试使用较短的视频';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMsg = '服务器连接失败，请检查网络或重试';
+                }
+                
+                addMessage(`关键词检测错误: ${errorMsg}`, 'bot');
                 console.error('Error:', error);
             }
+        }
+
+        function handleVideoSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedVideo = file;
+                
+                // 显示已选择的视频信息
+                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                videoName.textContent = `📹 ${file.name} (${sizeMB} MB)`;
+                selectedVideoInfo.style.display = 'block';
+                
+                updateDetectButton(); // 更新关键词检测按钮状态
+            }
+        }
+
+        function clearVideo() {
+            selectedVideo = null;
+            selectedVideoInfo.style.display = 'none';
+            videoInput.value = '';
+            updateDetectButton(); // 更新关键词检测按钮状态
         }
 
         async function sendMessage() {
