@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>豆包AI助手</title>
+    <title>AI视频审核系统</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -21,716 +21,1441 @@
             padding: 20px;
         }
 
-        .chat-container {
+        .main-container {
             width: 100%;
-            max-width: 800px;
-            height: 600px;
-            background: white;
+            max-width: 1400px;
+            height: 90vh;
+            background: #1e293b;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        .chat-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        /* 顶部标题栏 */
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .chat-header h1 {
-            font-size: 24px;
-            font-weight: 600;
-        }
-
-        .chat-header p {
-            font-size: 14px;
-            opacity: 0.9;
-            margin-top: 5px;
-        }
-
-        .video-upload-section {
-            padding: 15px 20px;
-            background: white;
-            border-bottom: 1px solid #eee;
-        }
-
-        .upload-controls {
+            padding: 20px 30px;
             display: flex;
-            gap: 10px;
             align-items: center;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .upload-btn {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .upload-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .analyze-video-btn {
-            padding: 10px 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .analyze-video-btn:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-
-        .analyze-video-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: #f8f9fa;
-        }
-
-        .message {
-            margin-bottom: 20px;
+        .header-left {
             display: flex;
-            animation: fadeIn 0.3s ease;
+            align-items: center;
+            gap: 20px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message.user {
-            justify-content: flex-end;
-        }
-
-        .message.bot {
-            justify-content: flex-start;
-        }
-
-        .message-content {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 18px;
-            line-height: 1.5;
-            font-size: 15px;
-        }
-
-        .user .message-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-bottom-right-radius: 6px;
-        }
-
-        .bot .message-content {
-            background: white;
-            color: #333;
-            border-bottom-left-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .message-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .header-icon {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 10px;
-            flex-shrink: 0;
+            font-size: 26px;
+            box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
         }
 
-        .user .message-avatar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .header-title {
+            display: flex;
+            flex-direction: column;
         }
 
-        .bot .message-avatar {
-            background: #e9ecef;
-            color: #666;
+        .header-title h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
-        .chat-input {
-            padding: 15px 20px;
-            background: white;
-            border-top: 1px solid #eee;
+        .header-title p {
+            font-size: 13px;
+            opacity: 0.7;
+            margin-top: 3px;
+            color: #94a3b8;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-badge {
+            padding: 8px 18px;
+            background: rgba(34, 197, 94, 0.15);
+            border-radius: 24px;
+            font-size: 13px;
+            color: #4ade80;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .status-badge.offline {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .status-badge.checking {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-badge.offline .status-dot {
+            background: #f87171;
+        }
+
+        .status-badge.checking .status-dot {
+            background: #fbbf24;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.9); }
+        }
+
+        .header-actions {
             display: flex;
             gap: 10px;
         }
 
-        .chat-input input {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid #e9ecef;
-            border-radius: 30px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .chat-input input:focus {
-            border-color: #667eea;
-        }
-
-        .chat-input button {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 15px;
+        .header-btn {
+            padding: 8px 16px;
+            background: rgba(14, 165, 233, 0.15);
+            border: 1px solid rgba(14, 165, 233, 0.3);
+            border-radius: 8px;
+            color: #0ea5e9;
+            font-size: 13px;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s;
         }
 
-        .chat-input button:hover {
+        .header-btn:hover {
+            background: rgba(14, 165, 233, 0.25);
+            border-color: #0ea5e9;
+        }
+
+        /* 功能导航栏 */
+        .nav-bar {
+            display: flex;
+            background: #0f172a;
+            padding: 0 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item {
+            padding: 18px 30px;
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            color: #f1f5f9;
+            background: rgba(14, 165, 233, 0.08);
+        }
+
+        .nav-item.active {
+            color: #0ea5e9;
+            background: rgba(14, 165, 233, 0.1);
+        }
+
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            right: 25%;
+            height: 3px;
+            background: linear-gradient(90deg, #0ea5e9, #06b6d4);
+            border-radius: 3px;
+        }
+
+        /* 主内容区域 */
+        .content-area {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* 左侧控制面板 */
+        .control-panel {
+            width: 380px;
+            background: #0f172a;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: linear-gradient(180deg, #0ea5e9, #06b6d4);
+            border-radius: 2px;
+        }
+
+        /* 视频上传区域 */
+        .upload-area {
+            border: 2px dashed #334155;
+            border-radius: 14px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.35s;
+            background: rgba(255, 255, 255, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-area:hover::before,
+        .upload-area.dragover::before {
+            left: 100%;
+        }
+
+        .upload-area:hover {
+            border-color: #0ea5e9;
+            background: rgba(14, 165, 233, 0.06);
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .chat-input button:active {
+        .upload-area.dragover {
+            border-color: #0ea5e9;
+            background: rgba(14, 165, 233, 0.12);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 44px;
+            margin-bottom: 16px;
+            opacity: 0.7;
+            transition: transform 0.3s;
+        }
+
+        .upload-area:hover .upload-icon {
+            transform: scale(1.1);
+        }
+
+        .upload-text {
+            font-size: 15px;
+            color: #f1f5f9;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .upload-hint {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        #videoInput {
+            display: none;
+        }
+
+        /* 已选择视频列表 */
+        .video-list {
+            max-height: 220px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+            padding: 6px;
+        }
+
+        .video-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .video-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .video-list::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 3px;
+        }
+
+        .video-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 14px;
+            background: #1e293b;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: 1px solid transparent;
+        }
+
+        .video-item:hover {
+            background: #334155;
+            transform: translateX(4px);
+        }
+
+        .video-item.selected {
+            border-color: #0ea5e9;
+            background: rgba(14, 165, 233, 0.1);
+        }
+
+        .video-thumb {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #334155, #475569);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .video-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .video-name {
+            font-size: 14px;
+            color: #f1f5f9;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .video-meta {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 3px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .video-size {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .video-remove {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            opacity: 0;
+        }
+
+        .video-item:hover .video-remove {
+            opacity: 1;
+        }
+
+        .video-remove:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        /* 检测设置区域 */
+        .settings-area {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .setting-label {
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .setting-input {
+            padding: 12px 14px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: #f1f5f9;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.25s;
+            font-family: inherit;
+        }
+
+        .setting-input:focus {
+            border-color: #0ea5e9;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+        }
+
+        .setting-input::placeholder {
+            color: #64748b;
+        }
+
+        .setting-textarea {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        /* 快速关键词标签 */
+        .quick-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quick-tag {
+            padding: 6px 14px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .quick-tag:hover {
+            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+            border-color: #0ea5e9;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+        }
+
+        /* 操作按钮 */
+        .action-btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn-primary {
+            background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        .action-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
+        }
+
+        .action-btn-primary:active {
             transform: translateY(0);
         }
 
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+        .action-btn-primary:disabled {
+            background: #334155;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .action-btn-secondary {
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+        }
+
+        .action-btn-secondary:hover {
+            background: #334155;
+            color: #f1f5f9;
+            border-color: #475569;
+        }
+
+        /* 右侧结果区域 */
+        .results-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .results-header {
+            padding: 20px 24px;
+            background: #1e293b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .results-title-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .results-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .results-count {
+            font-size: 13px;
+            color: #64748b;
+            padding: 4px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .results-filter {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #94a3b8;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: rgba(14, 165, 233, 0.1);
+            border-color: #0ea5e9;
+            color: #0ea5e9;
+        }
+
+        .filter-btn.active {
+            background: rgba(14, 165, 233, 0.15);
+            border-color: #0ea5e9;
+            color: #0ea5e9;
+        }
+
+        .results-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #0f172a;
+        }
+
+        /* 统计面板 */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            border-radius: 0 14px 14px 0;
+        }
+
+        .stat-card.total::before {
+            background: linear-gradient(180deg, #0ea5e9, #06b6d4);
+        }
+
+        .stat-card.pass::before {
+            background: linear-gradient(180deg, #22c55e, #16a34a);
+        }
+
+        .stat-card.fail::before {
+            background: linear-gradient(180deg, #ef4444, #dc2626);
+        }
+
+        .stat-card.rate::before {
+            background: linear-gradient(180deg, #f59e0b, #d97706);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #f1f5f9;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card.pass .stat-value {
+            color: #22c55e;
+        }
+
+        .stat-card.fail .stat-value {
+            color: #ef4444;
+        }
+
+        .stat-card.rate .stat-value {
+            color: #f59e0b;
+        }
+
+        /* 审核结果卡片 */
+        .result-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 16px;
+            border-left: 5px solid transparent;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .result-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .result-card.pass {
+            border-left-color: #22c55e;
+        }
+
+        .result-card.fail {
+            border-left-color: #ef4444;
+        }
+
+        .result-card.processing {
+            border-left-color: #f59e0b;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .result-video-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .result-video-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #334155, #475569);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+
+        .result-video-detail {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .result-video-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .result-video-meta {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .result-status-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-status {
+            padding: 8px 18px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-status.pass {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+        }
+
+        .result-status.fail {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .result-status.processing {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+        }
+
+        .result-score {
+            font-size: 12px;
+            color: #64748b;
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+
+        .result-content {
+            margin-bottom: 18px;
+        }
+
+        .result-section {
+            margin-bottom: 14px;
+        }
+
+        .result-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-section-title::before {
+            content: '';
+            width: 3px;
+            height: 12px;
+            background: #0ea5e9;
+            border-radius: 2px;
+        }
+
+        .result-section-content {
+            font-size: 14px;
+            color: #f1f5f9;
+            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 14px;
+            border-radius: 8px;
+        }
+
+        .result-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .result-list-item {
+            font-size: 14px;
+            color: #94a3b8;
+            padding: 10px 14px;
+            margin-bottom: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .result-list-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(4px);
+        }
+
+        .result-list-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            border-radius: 0 3px 3px 0;
+            background: #0ea5e9;
+        }
+
+        .result-list-item.warning::before {
+            background: #f59e0b;
+        }
+
+        .result-list-item.error::before {
+            background: #ef4444;
+        }
+
+        .result-list-item.success::before {
+            background: #22c55e;
+        }
+
+        .result-list-item strong {
+            color: #f1f5f9;
+            margin-right: 8px;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #64748b;
+            padding: 40px;
+        }
+
+        .empty-icon {
+            font-size: 80px;
+            opacity: 0.2;
+            margin-bottom: 24px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #94a3b8;
+        }
+
+        .empty-hint {
+            font-size: 14px;
+            text-align: center;
+            line-height: 1.6;
+            max-width: 320px;
+        }
+
+        /* 加载动画 */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(14, 165, 233, 0.1);
+            border-top-color: #0ea5e9;
             border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.8s linear infinite;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        .typing-indicator {
+        .loading-text {
+            font-size: 15px;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .loading-progress {
+            width: 200px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #0ea5e9, #06b6d4);
+            border-radius: 3px;
+            animation: progress 2s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        /* 底部状态栏 */
+        .footer {
+            padding: 14px 24px;
+            background: #1e293b;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
-            gap: 5px;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #64748b;
         }
 
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: #999;
-            border-radius: 50%;
-            animation: typing 1.4s ease-in-out infinite;
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
 
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
 
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-            30% { transform: translateY(-5px); opacity: 1; }
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .footer-value {
+            color: #0ea5e9;
+            font-weight: 500;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 900px) {
+            .content-area {
+                flex-direction: column;
+            }
+
+            .control-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                max-height: 50%;
+            }
+
+            .stats-panel {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 600px) {
-            .chat-container {
-                height: calc(100vh - 40px);
-                border-radius: 10px;
+            .main-container {
+                height: 95vh;
+                border-radius: 12px;
             }
 
-            .message-content {
-                max-width: 85%;
+            .header {
+                padding: 16px 20px;
+            }
+
+            .header-title h1 {
+                font-size: 18px;
+            }
+
+            .nav-item {
+                padding: 14px 16px;
+                font-size: 12px;
+            }
+
+            .stats-panel {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .stat-value {
+                font-size: 24px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <h1>豆包AI助手</h1>
-            <p>基于 doubao-seed-2-0-pro-260215 大模型</p>
+    <div class="main-container">
+        <!-- 顶部标题栏 -->
+        <div class="header">
+            <div class="header-left">
+                <div class="header-icon">🔍</div>
+                <div class="header-title">
+                    <h1>AI视频审核系统</h1>
+                    <p>基于豆包大模型 · 智能内容审核</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status-badge" id="statusBadge">
+                    <div class="status-dot"></div>
+                    <span id="statusText">检测中</span>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" onclick="generateReport()">📊 报告</button>
+                    <button class="header-btn" onclick="openSettings()">⚙️ 设置</button>
+                </div>
+            </div>
         </div>
-        
-        <div class="video-upload-section">
-            <div class="upload-controls">
-                <button class="upload-btn" onclick="document.getElementById('videoInput').click()">
-                    📹 上传视频（支持批量）
-                </button>
-                <input type="file" id="videoInput" accept="video/*" multiple style="display: none" onchange="handleVideoSelect(event)">
-                <button id="detectKeywordsBtn" class="analyze-video-btn" onclick="showKeywordSection()" style="background: #17a2b8;">
-                    🔎 检测关键词
-                </button>
-                <button id="reviewVideoBtn" class="analyze-video-btn" onclick="showReviewSection()" style="background: #ffc107; color: #333;">
-                    📋 合规检测
-                </button>
-                <button id="batchReviewBtn" class="analyze-video-btn" onclick="showBatchReviewSection()" style="background: #6f42c1;">
-                    📚 批量检测
-                </button>
-            </div>
-            
-            <!-- 关键词检测区域 -->
-            <div id="keywordSection" style="display: none; margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                <div style="margin-bottom: 10px; font-weight: bold; color: #333;">🎯 关键词检测设置</div>
-                <div style="margin-bottom: 10px;">
-                    <label style="font-size: 13px; color: #666; display: block; margin-bottom: 5px;">
-                        输入要检测的关键词（用逗号分隔）：
+
+        <!-- 功能导航栏 -->
+        <div class="nav-bar">
+            <div class="nav-item active" onclick="switchMode('review')">📋 合规检测</div>
+            <div class="nav-item" onclick="switchMode('keyword')">🔎 关键词检测</div>
+            <div class="nav-item" onclick="switchMode('batch')">📚 批量检测</div>
+        </div>
+
+        <!-- 主内容区域 -->
+        <div class="content-area">
+            <!-- 左侧控制面板 -->
+            <div class="control-panel">
+                <!-- 视频上传 -->
+                <div class="panel-section">
+                    <div class="section-title">视频文件</div>
+                    <label class="upload-area" for="videoInput">
+                        <div class="upload-icon">📹</div>
+                        <div class="upload-text">点击或拖拽上传视频</div>
+                        <div class="upload-hint">支持 MP4, AVI, MOV 等格式<br>单文件最大50MB</div>
                     </label>
-                    <input type="text" id="keywordInput" placeholder="例如: 人工智能, 机器学习, Python" 
-                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                    <input type="file" id="videoInput" accept="video/*" multiple onchange="handleVideoSelect(event)">
                 </div>
-                <div style="margin-bottom: 10px;">
-                    <div style="font-size: 13px; color: #666; margin-bottom: 8px;">💡 快速添加常用词：</div>
-                    <button onclick="addPresetKeyword('人工智能')" style="margin: 3px; padding: 5px 12px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 15px; cursor: pointer; font-size: 12px;">人工智能</button>
-                    <button onclick="addPresetKeyword('机器学习')" style="margin: 3px; padding: 5px 12px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 15px; cursor: pointer; font-size: 12px;">机器学习</button>
-                    <button onclick="addPresetKeyword('深度学习')" style="margin: 3px; padding: 5px 12px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 15px; cursor: pointer; font-size: 12px;">深度学习</button>
-                    <button onclick="addPresetKeyword('Python')" style="margin: 3px; padding: 5px 12px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 15px; cursor: pointer; font-size: 12px;">Python</button>
-                    <button onclick="addPresetKeyword('AI')" style="margin: 3px; padding: 5px 12px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 15px; cursor: pointer; font-size: 12px;">AI</button>
-                    <button onclick="addPresetKeyword('数据')" style="margin: 3px; padding: 5px 12px; background: #e9ecef; border: 1px solid #ced4da; border-radius: 15px; cursor: pointer; font-size: 12px;">数据</button>
-                </div>
-                <button id="startDetectBtn" class="analyze-video-btn" onclick="detectKeywords()" disabled style="background: #28a745;">
-                    🚀 开始检测
-                </button>
-                <button onclick="hideKeywordSection()" style="margin-left: 10px; padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">收起</button>
-            </div>
-            
-            <!-- 视频合规检测区域 -->
-            <div id="reviewSection" style="display: none; margin-top: 15px; padding: 15px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffeeba;">
-                <div style="margin-bottom: 10px; font-weight: bold; color: #856404;">📋 视频合规检测</div>
-                <div style="margin-bottom: 10px;">
-                    <label style="font-size: 13px; color: #666; display: block; margin-bottom: 5px;">
-                        输入检测要求（描述视频需要满足的条件）：
-                    </label>
-                    <textarea id="reviewRequirements" placeholder="例如: 视频内容必须包含产品介绍，时长不少于30秒，不能有敏感内容，需要清晰展示产品使用方法..." 
-                              style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; min-height: 100px; resize: vertical;"></textarea>
-                </div>
-                <button id="startReviewBtn" class="analyze-video-btn" onclick="reviewVideo()" disabled style="background: #17a2b8;">
-                    ✅ 开始检测
-                </button>
-                <button onclick="hideReviewSection()" style="margin-left: 10px; padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">收起</button>
-            </div>
-            
-            <!-- 批量视频检测区域 -->
-            <div id="batchReviewSection" style="display: none; margin-top: 15px; padding: 15px; background: #e7f3ff; border-radius: 8px; border: 1px solid #b8daff;">
-                <div style="margin-bottom: 10px; font-weight: bold; color: #004085;">📚 批量视频合规检测</div>
-                <div style="margin-bottom: 10px;">
-                    <label style="font-size: 13px; color: #666; display: block; margin-bottom: 5px;">
-                        输入统一的检测要求（所有视频使用相同标准）：
-                    </label>
-                    <textarea id="batchReviewRequirements" placeholder="例如: 视频内容必须包含产品介绍，不能有敏感内容，画面清晰" 
-                              style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; min-height: 100px; resize: vertical;"></textarea>
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <div style="font-size: 13px; color: #666; margin-bottom: 5px;">📁 已选择的视频（<span id="batchVideoCount">0</span> 个）：</div>
-                    <div id="batchVideoList" style="max-height: 200px; overflow-y: auto; background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
-                        <div style="color: #999; text-align: center; padding: 20px;">暂无视频，请在上方上传</div>
+
+                <!-- 已选择视频列表 -->
+                <div class="panel-section">
+                    <div class="section-title">已选择视频</div>
+                    <div id="videoList" class="video-list">
+                        <div style="text-align: center; padding: 24px; color: #64748b; font-size: 13px;">暂无视频</div>
                     </div>
                 </div>
-                <button id="startBatchReviewBtn" class="analyze-video-btn" onclick="startBatchReview()" disabled style="background: #6f42c1;">
-                    🚀 开始批量检测
-                </button>
-                <button onclick="hideBatchReviewSection()" style="margin-left: 10px; padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">收起</button>
+
+                <!-- 检测设置 -->
+                <div class="panel-section">
+                    <div class="section-title" id="settingsTitle">检测要求</div>
+                    <div class="settings-area" id="settingsArea">
+                        <!-- 合规检测设置 -->
+                        <div class="setting-item">
+                            <label class="setting-label">审核标准</label>
+                            <textarea id="reviewRequirements" class="setting-input setting-textarea" placeholder="请输入视频审核要求，例如：&#10;- 视频内容不得包含敏感信息&#10;- 视频时长不少于30秒&#10;- 画面需清晰可辨&#10;- 不得出现违规行为"></textarea>
+                        </div>
+                        
+                        <!-- 关键词检测设置 -->
+                        <div class="setting-item" id="keywordSettings" style="display: none;">
+                            <label class="setting-label">检测关键词</label>
+                            <input type="text" id="keywordInput" class="setting-input" placeholder="请输入要检测的关键词，用逗号分隔">
+                            <div class="quick-tags">
+                                <span class="quick-tag" onclick="addKeyword('敏感词')">🔴 敏感词</span>
+                                <span class="quick-tag" onclick="addKeyword('违规')">⚠️ 违规</span>
+                                <span class="quick-tag" onclick="addKeyword('广告')">📢 广告</span>
+                                <span class="quick-tag" onclick="addKeyword('暴力')">💥 暴力</span>
+                                <span class="quick-tag" onclick="addKeyword('色情')">🔞 色情</span>
+                                <span class="quick-tag" onclick="addKeyword('政治')">🏛️ 政治</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="panel-section" style="margin-top: auto;">
+                    <button id="startBtn" class="action-btn action-btn-primary" onclick="startDetection()" disabled>
+                        <span>🚀</span>
+                        <span id="btnText">开始检测</span>
+                    </button>
+                    <button class="action-btn action-btn-secondary" onclick="clearAll()" style="margin-top: 10px;">
+                        <span>🗑️</span>
+                        <span>清空所有</span>
+                    </button>
+                </div>
             </div>
-            
-            <!-- 已选择视频信息 -->
-            <div id="selectedVideoInfo" style="display: none; margin-top: 15px; padding: 10px; background: #d4edda; border-radius: 8px; color: #155724;">
-                <span id="videoName"></span>
-                <button onclick="clearVideo()" style="margin-left: 10px; padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">清除</button>
+
+            <!-- 右侧结果区域 -->
+            <div class="results-panel">
+                <div class="results-header">
+                    <div class="results-title-row">
+                        <div class="results-title">审核结果</div>
+                        <div class="results-count" id="resultsCount">共 0 个视频</div>
+                    </div>
+                    <div class="results-filter">
+                        <button class="filter-btn active" onclick="filterResults('all')">全部</button>
+                        <button class="filter-btn" onclick="filterResults('pass')">✅ 通过</button>
+                        <button class="filter-btn" onclick="filterResults('fail')">❌ 不通过</button>
+                    </div>
+                </div>
+                <div class="results-content" id="resultsContent">
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <div class="empty-title">暂无审核结果</div>
+                        <div class="empty-hint">上传视频并设置检测条件后，点击"开始检测"获取结果</div>
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div class="chat-messages" id="chatMessages">
-            <div class="message bot">
-                <div class="message-avatar">🤖</div>
-                <div class="message-content">你好！我是豆包AI助手，有什么可以帮你的吗？</div>
+
+        <!-- 底部状态栏 -->
+        <div class="footer">
+            <div class="footer-left">
+                <div class="footer-item">
+                    <span>模型:</span>
+                    <span class="footer-value">doubao-seed-2-0-pro-260215</span>
+                </div>
+                <div class="footer-item">
+                    <span>版本:</span>
+                    <span>v1.0.0</span>
+                </div>
             </div>
-        </div>
-        
-        <div class="chat-input">
-            <input type="text" id="messageInput" placeholder="输入你的问题..." onkeydown="handleKeyDown(event)">
-            <button id="sendBtn" onclick="sendMessage()">
-                <span id="btnText">发送</span>
-                <span id="btnLoading" class="loading" style="display: none;"></span>
-            </button>
+            <div class="footer-right">
+                <div class="footer-item">
+                    <span>已处理:</span>
+                    <span class="footer-value" id="processedCount">0</span>
+                    <span>个视频</span>
+                </div>
+                <div class="footer-item">
+                    <span>用时:</span>
+                    <span id="processingTime">0s</span>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const chatMessages = document.getElementById('chatMessages');
-        const messageInput = document.getElementById('messageInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const btnText = document.getElementById('btnText');
-        const btnLoading = document.getElementById('btnLoading');
+        let selectedVideos = [];
+        let currentMode = 'review';
+        let processedCount = 0;
+        let currentResults = [];
+        let filterType = 'all';
+
+        const statusBadge = document.getElementById('statusBadge');
+        const statusText = document.getElementById('statusText');
         const videoInput = document.getElementById('videoInput');
-        const selectedVideoInfo = document.getElementById('selectedVideoInfo');
-        const videoName = document.getElementById('videoName');
-
-        let selectedVideo = null;
-        let selectedVideos = []; // 批量视频列表
-        const keywordInput = document.getElementById('keywordInput');
-        const startDetectBtn = document.getElementById('startDetectBtn');
+        const videoList = document.getElementById('videoList');
         const reviewRequirements = document.getElementById('reviewRequirements');
-        const startReviewBtn = document.getElementById('startReviewBtn');
-        const batchReviewRequirements = document.getElementById('batchReviewRequirements');
-        const startBatchReviewBtn = document.getElementById('startBatchReviewBtn');
-        const batchVideoList = document.getElementById('batchVideoList');
-        const batchVideoCount = document.getElementById('batchVideoCount');
+        const keywordInput = document.getElementById('keywordInput');
+        const keywordSettings = document.getElementById('keywordSettings');
+        const settingsTitle = document.getElementById('settingsTitle');
+        const settingsArea = document.getElementById('settingsArea');
+        const startBtn = document.getElementById('startBtn');
+        const btnText = document.getElementById('btnText');
+        const resultsContent = document.getElementById('resultsContent');
+        const resultsCount = document.getElementById('resultsCount');
+        const processedCountEl = document.getElementById('processedCount');
+        const processingTimeEl = document.getElementById('processingTime');
 
-        function showKeywordSection() {
-            const section = document.getElementById('keywordSection');
-            if (section.style.display === 'none') {
-                section.style.display = 'block';
-            } else {
-                section.style.display = 'none';
+        // 服务状态检测
+        function updateServiceStatus(status) {
+            statusBadge.classList.remove('checking', 'offline');
+            
+            switch(status) {
+                case 'checking':
+                    statusBadge.classList.add('checking');
+                    statusText.textContent = '检测中';
+                    break;
+                case 'online':
+                    statusText.textContent = '服务正常';
+                    break;
+                case 'offline':
+                    statusBadge.classList.add('offline');
+                    statusText.textContent = '服务异常';
+                    break;
             }
         }
 
-        function hideKeywordSection() {
-            document.getElementById('keywordSection').style.display = 'none';
-        }
-
-        function showReviewSection() {
-            const section = document.getElementById('reviewSection');
-            if (section.style.display === 'none') {
-                section.style.display = 'block';
-            } else {
-                section.style.display = 'none';
+        async function checkServiceStatus() {
+            updateServiceStatus('checking');
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch('/api/health', {
+                    method: 'GET',
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    updateServiceStatus('online');
+                } else {
+                    updateServiceStatus('offline');
+                }
+            } catch (error) {
+                updateServiceStatus('offline');
             }
         }
 
-        function hideReviewSection() {
-            document.getElementById('reviewSection').style.display = 'none';
-        }
+        // 启动定期检测
+        checkServiceStatus();
+        setInterval(checkServiceStatus, 5000);
 
-        function showBatchReviewSection() {
-            const section = document.getElementById('batchReviewSection');
-            if (section.style.display === 'none') {
-                section.style.display = 'block';
-            } else {
-                section.style.display = 'none';
+        // 切换模式
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.nav-item[onclick="switchMode('${mode}')"]`).classList.add('active');
+
+            if (mode === 'review') {
+                settingsTitle.textContent = '检测要求';
+                reviewRequirements.style.display = 'block';
+                keywordSettings.style.display = 'none';
+            } else if (mode === 'keyword') {
+                settingsTitle.textContent = '关键词设置';
+                reviewRequirements.style.display = 'none';
+                keywordSettings.style.display = 'block';
+            } else if (mode === 'batch') {
+                settingsTitle.textContent = '批量检测要求';
+                reviewRequirements.style.display = 'block';
+                keywordSettings.style.display = 'none';
             }
-            updateBatchVideoList();
+
+            updateStartButton();
         }
 
-        function hideBatchReviewSection() {
-            document.getElementById('batchReviewSection').style.display = 'none';
+        // 处理视频选择
+        function handleVideoSelect(event) {
+            const files = Array.from(event.target.files);
+            
+            files.forEach(file => {
+                const isDuplicate = selectedVideos.some(v => v.name === file.name && v.size === file.size);
+                if (!isDuplicate) {
+                    selectedVideos.push(file);
+                }
+            });
+
+            renderVideoList();
+            updateStartButton();
         }
 
-        function addPresetKeyword(keyword) {
-            const currentText = keywordInput.value.trim();
-            if (currentText) {
-                // 检查是否已存在
-                const keywords = currentText.split(',').map(k => k.trim());
+        // 渲染视频列表
+        function renderVideoList() {
+            if (selectedVideos.length === 0) {
+                videoList.innerHTML = '<div style="text-align: center; padding: 24px; color: #64748b; font-size: 13px;">暂无视频</div>';
+                return;
+            }
+
+            videoList.innerHTML = selectedVideos.map((video, index) => {
+                const sizeMB = (video.size / (1024 * 1024)).toFixed(2);
+                const date = new Date(video.lastModified).toLocaleDateString('zh-CN');
+                return `
+                    <div class="video-item" data-index="${index}">
+                        <div class="video-thumb">🎬</div>
+                        <div class="video-info">
+                            <div class="video-name">${video.name}</div>
+                            <div class="video-meta">
+                                <span class="video-size">📦 ${sizeMB} MB</span>
+                                <span>📅 ${date}</span>
+                            </div>
+                        </div>
+                        <div class="video-remove" onclick="removeVideo(${index})">✕</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 移除视频
+        function removeVideo(index) {
+            selectedVideos.splice(index, 1);
+            renderVideoList();
+            updateStartButton();
+        }
+
+        // 添加关键词
+        function addKeyword(keyword) {
+            const currentValue = keywordInput.value.trim();
+            if (currentValue) {
+                const keywords = currentValue.split(',').map(k => k.trim());
                 if (!keywords.includes(keyword)) {
-                    keywordInput.value = currentText + ', ' + keyword;
+                    keywordInput.value = currentValue + ', ' + keyword;
                 }
             } else {
                 keywordInput.value = keyword;
             }
-            // 启用检测按钮
-            updateDetectButton();
+            updateStartButton();
         }
 
-        function updateDetectButton() {
-            const keywords = keywordInput.value.trim();
-            startDetectBtn.disabled = !selectedVideo || !keywords;
-        }
+        // 更新开始按钮状态
+        function updateStartButton() {
+            const hasVideos = selectedVideos.length > 0;
+            let hasSettings = false;
 
-        function updateReviewButton() {
-            const requirements = reviewRequirements.value.trim();
-            startReviewBtn.disabled = !selectedVideo || !requirements;
-        }
-
-        function updateBatchReviewButton() {
-            const requirements = batchReviewRequirements.value.trim();
-            startBatchReviewBtn.disabled = selectedVideos.length === 0 || !requirements;
-        }
-
-        // 监听关键词输入变化
-        keywordInput.addEventListener('input', updateDetectButton);
-        // 监听合规检测要求输入变化
-        reviewRequirements.addEventListener('input', updateReviewButton);
-        // 监听批量检测要求输入变化
-        batchReviewRequirements.addEventListener('input', updateBatchReviewButton);
-
-        async function detectKeywords() {
-            if (!selectedVideo) {
-                alert('请先选择视频');
-                return;
+            if (currentMode === 'review' || currentMode === 'batch') {
+                hasSettings = reviewRequirements.value.trim().length > 0;
+            } else if (currentMode === 'keyword') {
+                hasSettings = keywordInput.value.trim().length > 0;
             }
 
-            const keywordsText = keywordInput.value.trim();
-            if (!keywordsText) {
-                alert('请输入要检测的关键词');
-                return;
-            }
+            startBtn.disabled = !(hasVideos && hasSettings);
+        }
 
-            const keywords = keywordsText.split(',').map(k => k.trim()).filter(k => k);
-            if (keywords.length === 0) {
-                alert('请输入有效的关键词');
-                return;
-            }
-
-            // 显示用户消息
-            addMessage(`[关键词检测]\n检测词汇: ${keywords.join(', ')}`, 'user');
-
-            // 添加加载状态
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'message bot';
-            loadingDiv.innerHTML = `
-                <div class="message-avatar">🤖</div>
-                <div class="message-content">
-                    <div class="typing-indicator">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                    <div id="progress-text">正在上传视频...</div>
+        // 清空所有
+        function clearAll() {
+            selectedVideos = [];
+            currentResults = [];
+            videoInput.value = '';
+            reviewRequirements.value = '';
+            keywordInput.value = '';
+            renderVideoList();
+            updateStartButton();
+            resultsContent.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <div class="empty-title">暂无审核结果</div>
+                    <div class="empty-hint">上传视频并设置检测条件后，点击"开始检测"获取结果</div>
                 </div>
             `;
-            chatMessages.appendChild(loadingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            try {
-                const formData = new FormData();
-                formData.append('keywords', JSON.stringify(keywords));
-                formData.append('video', selectedVideo);
-
-                // 创建带超时的请求
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => {
-                    controller.abort();
-                }, 300000); // 5分钟超时
-
-                const response = await fetch('/api/detect-keywords', {
-                    method: 'POST',
-                    body: formData,
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-
-                // 移除加载状态（检查元素是否存在）
-                if (chatMessages.contains(loadingDiv)) {
-                    chatMessages.removeChild(loadingDiv);
-                }
-
-                if (!response.ok) {
-                    let errorData;
-                    try {
-                        errorData = await response.json();
-                    } catch {
-                        errorData = { detail: `HTTP错误: ${response.status}` };
-                    }
-                    throw new Error(errorData.detail || '关键词检测失败');
-                }
-
-                const data = await response.json();
-                
-                // 格式化结果
-                let resultMessage = '✅ 关键词检测结果：\n\n';
-                
-                if (data.results && data.results.length > 0) {
-                    data.results.forEach(result => {
-                        resultMessage += `🔍 "${result.keyword}"\n`;
-                        if (result.matches && result.matches.length > 0) {
-                            resultMessage += `   出现 ${result.matches.length} 次：\n`;
-                            result.matches.forEach(match => {
-                                resultMessage += `   ⏱️ ${match.timestamp} - ${match.context}\n`;
-                            });
-                        } else {
-                            resultMessage += `   ❌ 未检测到\n`;
-                        }
-                        resultMessage += '\n';
-                    });
-                } else {
-                    resultMessage = '❌ 未在视频中检测到任何关键词';
-                }
-                
-                resultMessage += `\n📊 统计：共检测 ${data.total_matches || 0} 处匹配`;
-                
-                addMessage(resultMessage, 'bot');
-            } catch (error) {
-                // 移除加载状态
-                if (chatMessages.contains(loadingDiv)) {
-                    chatMessages.removeChild(loadingDiv);
-                }
-                
-                let errorMsg = error.message;
-                if (error.name === 'AbortError') {
-                    errorMsg = '请求超时，请尝试使用较短的视频';
-                } else if (error.message.includes('Failed to fetch')) {
-                    errorMsg = '服务器连接失败，请检查网络或重试';
-                }
-                
-                addMessage(`关键词检测错误: ${errorMsg}`, 'bot');
-                console.error('Error:', error);
-            }
+            resultsCount.textContent = '共 0 个视频';
+            processingTimeEl.textContent = '0s';
         }
 
-        function handleVideoSelect(event) {
-            const files = Array.from(event.target.files);
-            
-            if (files.length > 0) {
-                // 总是选择第一个视频作为当前视频
-                selectedVideo = files[0];
-                
-                // 将所有视频添加到批量列表（避免重复）
-                files.forEach(file => {
-                    const isDuplicate = selectedVideos.some(v => v.name === file.name && v.size === file.size);
-                    if (!isDuplicate) {
-                        selectedVideos.push(file);
-                    }
-                });
-                
-                // 显示已选择的视频信息（单个）
-                const sizeMB = (selectedVideo.size / (1024 * 1024)).toFixed(2);
-                videoName.textContent = `📹 ${selectedVideo.name} (${sizeMB} MB)${selectedVideos.length > 1 ? ` 等${selectedVideos.length}个视频` : ''}`;
-                selectedVideoInfo.style.display = 'block';
-                
-                updateDetectButton(); // 更新关键词检测按钮状态
-                updateReviewButton(); // 更新合规检测按钮状态
-                updateBatchReviewButton(); // 更新批量检测按钮状态
-                updateBatchVideoList(); // 更新批量视频列表
-            }
+        // 筛选结果
+        function filterResults(type) {
+            filterType = type;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.filter-btn[onclick="filterResults('${type}')"]`).classList.add('active');
+            renderResults(currentResults);
         }
 
-        function clearVideo() {
-            selectedVideo = null;
-            selectedVideoInfo.style.display = 'none';
-            videoInput.value = '';
-            updateDetectButton(); // 更新关键词检测按钮状态
-            updateReviewButton(); // 更新合规检测按钮状态
-            updateBatchReviewButton(); // 更新批量检测按钮状态
-        }
-
-        function updateBatchVideoList() {
-            // 更新批量视频列表显示
-            if (selectedVideos.length === 0) {
-                batchVideoList.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">暂无视频，请在上方上传</div>';
-            } else {
-                batchVideoList.innerHTML = selectedVideos.map((video, index) => {
-                    const sizeMB = (video.size / (1024 * 1024)).toFixed(2);
-                    return `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
-                            <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                <span style="color: #666; font-size: 12px;">${index + 1}.</span> 
-                                <span style="color: #333;">📹 ${video.name}</span>
-                                <span style="color: #999; font-size: 11px;">(${sizeMB} MB)</span>
-                            </div>
-                            <button onclick="removeBatchVideo(${index})" style="padding: 3px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">删除</button>
-                        </div>
-                    `;
-                }).join('');
-            }
-            
-            // 更新计数
-            batchVideoCount.textContent = selectedVideos.length;
-            updateBatchReviewButton();
-        }
-
-        function removeBatchVideo(index) {
-            const removedVideo = selectedVideos[index];
-            selectedVideos.splice(index, 1);
-            
-            // 如果删除的是当前选中的视频，更新当前视频
-            if (selectedVideo && selectedVideo.name === removedVideo.name && selectedVideo.size === removedVideo.size) {
-                selectedVideo = selectedVideos.length > 0 ? selectedVideos[0] : null;
-                if (selectedVideo) {
-                    const sizeMB = (selectedVideo.size / (1024 * 1024)).toFixed(2);
-                    videoName.textContent = `📹 ${selectedVideo.name} (${sizeMB} MB)${selectedVideos.length > 1 ? ` 等${selectedVideos.length}个视频` : ''}`;
-                    selectedVideoInfo.style.display = 'block';
-                } else {
-                    selectedVideoInfo.style.display = 'none';
-                }
-            } else {
-                // 更新显示文本
-                if (selectedVideo) {
-                    const sizeMB = (selectedVideo.size / (1024 * 1024)).toFixed(2);
-                    videoName.textContent = `📹 ${selectedVideo.name} (${sizeMB} MB)${selectedVideos.length > 1 ? ` 等${selectedVideos.length}个视频` : ''}`;
-                }
-            }
-            
-            updateBatchVideoList();
-            updateDetectButton();
-            updateReviewButton();
-            updateBatchReviewButton();
-        }
-
-        async function startBatchReview() {
+        // 开始检测
+        async function startDetection() {
             if (selectedVideos.length === 0) {
                 alert('请先上传视频');
                 return;
             }
 
-            const requirements = batchReviewRequirements.value.trim();
-            if (!requirements) {
-                alert('请输入检测要求');
-                return;
-            }
+            btnText.textContent = '检测中...';
+            startBtn.disabled = true;
+            const startTime = Date.now();
 
-            // 显示用户消息
-            addMessage(`[批量视频合规检测]\n检测要求: ${requirements}\n视频数量: ${selectedVideos.length}个`, 'user');
-
-            // 添加加载状态
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'message bot';
-            loadingDiv.innerHTML = `
-                <div class="message-avatar">🤖</div>
-                <div class="message-content">
-                    <div class="typing-indicator">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
+            resultsContent.innerHTML = `
+                <div class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <div class="loading-text">正在分析视频...</div>
+                    <div class="loading-progress">
+                        <div class="loading-bar"></div>
                     </div>
-                    <div id="progress-text">正在开始批量检测...</div>
                 </div>
             `;
-            chatMessages.appendChild(loadingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
 
             const results = [];
             const totalVideos = selectedVideos.length;
 
             try {
-                // 逐个检测视频
-                for (let i = 0; i < selectedVideos.length; i++) {
+                for (let i = 0; i < totalVideos; i++) {
                     const video = selectedVideos[i];
+                    const progress = ((i + 1) / totalVideos * 100).toFixed(0);
                     
-                    // 更新进度
-                    const progressText = document.getElementById('progress-text');
-                    if (progressText) {
-                        progressText.textContent = `正在检测第 ${i + 1}/${totalVideos} 个视频: ${video.name}`;
-                    }
-                    
+                    resultsContent.innerHTML = `
+                        <div class="loading-container">
+                            <div class="loading-spinner"></div>
+                            <div class="loading-text">正在检测第 ${i + 1}/${totalVideos} 个视频...</div>
+                            <div style="width: 200px; text-align: center; margin-top: 8px; font-size: 13px; color: #64748b;">${progress}%</div>
+                            <div class="loading-progress">
+                                <div class="loading-bar" style="width: ${progress}%; animation: none;"></div>
+                            </div>
+                        </div>
+                    `;
+
                     try {
                         const formData = new FormData();
-                        formData.append('requirements', requirements);
+                        
+                        if (currentMode === 'review' || currentMode === 'batch') {
+                            formData.append('requirements', reviewRequirements.value.trim());
+                        } else if (currentMode === 'keyword') {
+                            const keywords = keywordInput.value.split(',').map(k => k.trim()).filter(k => k);
+                            formData.append('keywords', JSON.stringify(keywords));
+                        }
+                        
                         formData.append('video', video);
 
-                        // 创建带超时的请求
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => {
-                            controller.abort();
-                        }, 300000); // 5分钟超时
+                        const timeoutId = setTimeout(() => controller.abort(), 300000);
 
-                        const response = await fetch('/api/review-video', {
+                        const endpoint = currentMode === 'keyword' ? '/api/detect-keywords' : '/api/review-video';
+                        const response = await fetch(endpoint, {
                             method: 'POST',
                             body: formData,
                             signal: controller.signal
@@ -747,262 +1472,277 @@
                             }
                             results.push({
                                 name: video.name,
-                                pass: false,
+                                status: 'fail',
                                 error: errorData.detail || '检测失败'
                             });
                         } else {
                             const data = await response.json();
-                            results.push({
-                                name: video.name,
-                                pass: data.pass,
-                                result: data.result,
-                                reasons: data.reasons || [],
-                                issues: data.issues || []
-                            });
+                            
+                            if (currentMode === 'keyword') {
+                                const totalMatches = data.results?.reduce((sum, kw) => sum + (kw.matches?.length || 0), 0) || 0;
+                                results.push({
+                                    name: video.name,
+                                    status: totalMatches > 0 ? 'fail' : 'pass',
+                                    result: `检测到 ${totalMatches} 处关键词匹配`,
+                                    matches: data.results || [],
+                                    score: totalMatches > 0 ? Math.max(0, 100 - totalMatches * 10) : 100
+                                });
+                            } else {
+                                results.push({
+                                    name: video.name,
+                                    status: data.pass ? 'pass' : 'fail',
+                                    result: data.result || '',
+                                    reasons: data.reasons || [],
+                                    issues: data.issues || [],
+                                    score: data.pass ? 100 : Math.max(0, 100 - (data.issues?.length || 0) * 20)
+                                });
+                            }
                         }
                     } catch (error) {
                         results.push({
                             name: video.name,
-                            pass: false,
-                            error: error.name === 'AbortError' ? '检测超时' : error.message
+                            status: 'fail',
+                            error: error.name === 'AbortError' ? '检测超时' : error.message,
+                            score: 0
                         });
                     }
                 }
 
-                // 移除加载状态
-                if (chatMessages.contains(loadingDiv)) {
-                    chatMessages.removeChild(loadingDiv);
-                }
+                const endTime = Date.now();
+                const duration = Math.round((endTime - startTime) / 1000);
+                processingTimeEl.textContent = `${duration}s`;
 
-                // 格式化结果
-                let resultMessage = '📊 批量检测结果汇总\n\n';
-                
-                const passedVideos = results.filter(r => r.pass);
-                const failedVideos = results.filter(r => !r.pass);
-                
-                resultMessage += `✅ 通过: ${passedVideos.length} 个\n`;
-                resultMessage += `❌ 不通过: ${failedVideos.length} 个\n\n`;
-                resultMessage += `━━━━━━━━━━━━━━━\n\n`;
-                
-                // 显示不通过的视频（优先显示）
-                if (failedVideos.length > 0) {
-                    resultMessage += `❌ 不通过的视屏 (${failedVideos.length}个):\n`;
-                    failedVideos.forEach((video, index) => {
-                        resultMessage += `\n${index + 1}. ${video.name}\n`;
-                        if (video.error) {
-                            resultMessage += `   错误: ${video.error}\n`;
-                        } else if (video.issues && video.issues.length > 0) {
-                            resultMessage += `   问题:\n`;
-                            video.issues.forEach((issue, i) => {
-                                resultMessage += `   - ${issue}\n`;
-                            });
-                        }
-                    });
-                    resultMessage += '\n━━━━━━━━━━━━━━━\n\n';
-                }
-                
-                // 显示通过的视频
-                if (passedVideos.length > 0) {
-                    resultMessage += `✅ 通过的视屏 (${passedVideos.length}个):\n`;
-                    passedVideos.forEach((video, index) => {
-                        resultMessage += `\n${index + 1}. ${video.name}\n`;
-                        if (video.reasons && video.reasons.length > 0) {
-                            resultMessage += `   理由:\n`;
-                            video.reasons.forEach((reason, i) => {
-                                resultMessage += `   - ${reason}\n`;
-                            });
-                        }
-                    });
-                }
-                
-                addMessage(resultMessage, 'bot');
-                
+                processedCount += totalVideos;
+                processedCountEl.textContent = processedCount;
+                currentResults = results;
+                renderResults(results);
+
             } catch (error) {
-                // 移除加载状态
-                if (chatMessages.contains(loadingDiv)) {
-                    chatMessages.removeChild(loadingDiv);
-                }
-                
-                addMessage(`批量检测错误: ${error.message}`, 'bot');
-                console.error('Error:', error);
+                resultsContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❌</div>
+                        <div class="empty-title">检测失败</div>
+                        <div class="empty-hint">${error.message}</div>
+                    </div>
+                `;
+            } finally {
+                btnText.textContent = '开始检测';
+                startBtn.disabled = false;
             }
         }
 
-        async function reviewVideo() {
-            if (!selectedVideo) {
-                alert('请先选择视频');
-                return;
+        // 渲染检测结果
+        function renderResults(results) {
+            let filteredResults = results;
+            if (filterType === 'pass') {
+                filteredResults = results.filter(r => r.status === 'pass');
+            } else if (filterType === 'fail') {
+                filteredResults = results.filter(r => r.status === 'fail');
             }
 
-            const requirements = reviewRequirements.value.trim();
-            if (!requirements) {
-                alert('请输入检测要求');
-                return;
-            }
+            const passedCount = results.filter(r => r.status === 'pass').length;
+            const failedCount = results.filter(r => r.status === 'fail').length;
+            const total = results.length;
+            const passRate = total > 0 ? ((passedCount / total) * 100).toFixed(1) : 0;
 
-            // 显示用户消息
-            addMessage(`[视频合规检测]\n检测要求: ${requirements}`, 'user');
+            resultsCount.textContent = `共 ${filteredResults.length} 个视频`;
 
-            // 添加加载状态
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'message bot';
-            loadingDiv.innerHTML = `
-                <div class="message-avatar">🤖</div>
-                <div class="message-content">
-                    <div class="typing-indicator">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
+            let html = '';
+            if (total > 0) {
+                html = `
+                    <div class="stats-panel">
+                        <div class="stat-card total">
+                            <div class="stat-icon">📹</div>
+                            <div class="stat-value">${total}</div>
+                            <div class="stat-label">总视频数</div>
+                        </div>
+                        <div class="stat-card pass">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-value">${passedCount}</div>
+                            <div class="stat-label">通过</div>
+                        </div>
+                        <div class="stat-card fail">
+                            <div class="stat-icon">❌</div>
+                            <div class="stat-value">${failedCount}</div>
+                            <div class="stat-label">不通过</div>
+                        </div>
+                        <div class="stat-card rate">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-value">${passRate}%</div>
+                            <div class="stat-label">通过率</div>
+                        </div>
                     </div>
-                    <div id="progress-text">正在上传视频并分析...</div>
-                </div>
-            `;
-            chatMessages.appendChild(loadingDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+                `;
+            }
 
-            try {
-                const formData = new FormData();
-                formData.append('requirements', requirements);
-                formData.append('video', selectedVideo);
+            if (filteredResults.length === 0) {
+                html += `
+                    <div class="empty-state">
+                        <div class="empty-icon">📊</div>
+                        <div class="empty-title">暂无匹配结果</div>
+                        <div class="empty-hint">当前筛选条件下没有找到匹配的审核结果</div>
+                    </div>
+                `;
+                resultsContent.innerHTML = html;
+                return;
+            }
 
-                // 创建带超时的请求
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => {
-                    controller.abort();
-                }, 300000); // 5分钟超时
-
-                const response = await fetch('/api/review-video', {
-                    method: 'POST',
-                    body: formData,
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-
-                // 移除加载状态（检查元素是否存在）
-                if (chatMessages.contains(loadingDiv)) {
-                    chatMessages.removeChild(loadingDiv);
-                }
-
-                if (!response.ok) {
-                    let errorData;
-                    try {
-                        errorData = await response.json();
-                    } catch {
-                        errorData = { detail: `HTTP错误: ${response.status}` };
-                    }
-                    throw new Error(errorData.detail || '视频检测失败');
-                }
-
-                const data = await response.json();
+            filteredResults.forEach(result => {
+                let cardContent = '';
                 
-                // 格式化结果
-                let resultMessage = '';
-                if (data.pass) {
-                    resultMessage = `✅ 通过\n\n`;
-                    resultMessage += `评估结果: ${data.result}\n\n`;
-                    if (data.reasons && data.reasons.length > 0) {
-                        resultMessage += `符合要求的理由:\n`;
-                        data.reasons.forEach((reason, index) => {
-                            resultMessage += `${index + 1}. ${reason}\n`;
+                if (result.error) {
+                    cardContent = `
+                        <div class="result-section">
+                            <div class="result-section-title">错误信息</div>
+                            <div class="result-section-content">${result.error}</div>
+                        </div>
+                    `;
+                } else if (currentMode === 'keyword') {
+                    cardContent = `
+                        <div class="result-section">
+                            <div class="result-section-title">检测结果</div>
+                            <div class="result-section-content">${result.result}</div>
+                        </div>
+                    `;
+                    
+                    if (result.matches && result.matches.length > 0) {
+                        cardContent += `
+                            <div class="result-section">
+                                <div class="result-section-title">关键词匹配详情</div>
+                                <ul class="result-list">
+                        `;
+                        result.matches.forEach(kw => {
+                            const matchCount = kw.matches?.length || 0;
+                            cardContent += `
+                                <li class="result-list-item ${matchCount > 0 ? 'warning' : ''}">
+                                    <strong>${kw.keyword}</strong>: ${matchCount} 次匹配
+                                    ${kw.matches?.map((m, i) => `<br>  • 时间戳 ${i + 1}: ${m}`).join('') || ''}
+                                </li>
+                            `;
                         });
+                        cardContent += `</ul></div>`;
                     }
                 } else {
-                    resultMessage = `❌ 不通过\n\n`;
-                    resultMessage += `评估结果: ${data.result}\n\n`;
-                    if (data.issues && data.issues.length > 0) {
-                        resultMessage += `不符合要求的问题:\n`;
-                        data.issues.forEach((issue, index) => {
-                            resultMessage += `${index + 1}. ${issue}\n`;
+                    cardContent = `
+                        <div class="result-section">
+                            <div class="result-section-title">评估结果</div>
+                            <div class="result-section-content">${result.result}</div>
+                        </div>
+                    `;
+
+                    if (result.status === 'pass' && result.reasons && result.reasons.length > 0) {
+                        cardContent += `
+                            <div class="result-section">
+                                <div class="result-section-title">通过理由</div>
+                                <ul class="result-list">
+                        `;
+                        result.reasons.forEach(reason => {
+                            cardContent += `<li class="result-list-item success">${reason}</li>`;
                         });
+                        cardContent += `</ul></div>`;
+                    } else if (result.status === 'fail' && result.issues && result.issues.length > 0) {
+                        cardContent += `
+                            <div class="result-section">
+                                <div class="result-section-title">问题列表</div>
+                                <ul class="result-list">
+                        `;
+                        result.issues.forEach(issue => {
+                            cardContent += `<li class="result-list-item error">${issue}</li>`;
+                        });
+                        cardContent += `</ul></div>`;
+                    }
+                }
+
+                html += `
+                    <div class="result-card ${result.status}">
+                        <div class="result-header">
+                            <div class="result-video-info">
+                                <div class="result-video-icon">🎬</div>
+                                <div class="result-video-detail">
+                                    <div class="result-video-name">${result.name}</div>
+                                    <div class="result-video-meta">检测模式: ${currentMode === 'keyword' ? '关键词检测' : '合规检测'}</div>
+                                </div>
+                            </div>
+                            <div class="result-status-row">
+                                <span class="result-status ${result.status}">
+                                    ${result.status === 'pass' ? '✅ 通过' : '❌ 不通过'}
+                                </span>
+                                ${result.score !== undefined ? `<span class="result-score">评分: ${result.score}/100</span>` : ''}
+                            </div>
+                        </div>
+                        ${cardContent}
+                    </div>
+                `;
+            });
+
+            resultsContent.innerHTML = html;
+        }
+
+        // 生成报告
+        function generateReport() {
+            if (currentResults.length === 0) {
+                alert('暂无审核结果可生成报告');
+                return;
+            }
+
+            const now = new Date();
+            
+            // 创建CSV内容
+            let csvContent = '\uFEFF'; // BOM for UTF-8
+            csvContent += '视频名称,审核结果,AI回复\n';
+            
+            currentResults.forEach((result) => {
+                let aiReply = '';
+                
+                if (result.error) {
+                    aiReply = result.error;
+                } else if (currentMode === 'keyword') {
+                    aiReply = result.result || '';
+                    if (result.matches && result.matches.length > 0) {
+                        const matchDetails = result.matches.map(kw => 
+                            `${kw.keyword}: ${kw.matches?.length || 0}次`
+                        ).join('; ');
+                        if (matchDetails) {
+                            aiReply += ` (${matchDetails})`;
+                        }
+                    }
+                } else {
+                    aiReply = result.result || '';
+                    if (result.reasons && result.reasons.length > 0) {
+                        aiReply += '; 通过理由: ' + result.reasons.join('; ');
+                    }
+                    if (result.issues && result.issues.length > 0) {
+                        aiReply += '; 问题: ' + result.issues.join('; ');
                     }
                 }
                 
-                addMessage(resultMessage, 'bot');
-            } catch (error) {
-                // 移除加载状态（检查元素是否存在）
-                try {
-                    if (loadingDiv.parentNode === chatMessages) {
-                        chatMessages.removeChild(loadingDiv);
-                    }
-                } catch (e) {
-                    console.warn('加载状态已移除');
-                }
+                // 转义特殊字符
+                const name = result.name.replace(/"/g, '""');
+                const status = result.status === 'pass' ? '通过' : '不通过';
+                const reply = aiReply.replace(/"/g, '""');
                 
-                let errorMsg = error.message;
-                if (error.name === 'AbortError') {
-                    errorMsg = '请求超时，请尝试使用较短的视频';
-                } else if (error.message.includes('Failed to fetch')) {
-                    errorMsg = '服务器连接失败，请检查网络或重试';
-                }
-                
-                addMessage(`视频检测错误: ${errorMsg}`, 'bot');
-                console.error('Error:', error);
-            }
+                csvContent += `"${name}","${status}","${reply}"\n`;
+            });
+
+            // 创建下载
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `视频审核报告_${now.toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
-        async function sendMessage() {
-            const message = messageInput.value.trim();
-            if (!message) return;
-
-            addMessage(message, 'user');
-            messageInput.value = '';
-
-            btnText.style.display = 'none';
-            btnLoading.style.display = 'inline-block';
-            sendBtn.disabled = true;
-
-            try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: message })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`HTTP ${response.status}: ${errorData.detail || '请求失败'}`);
-                }
-
-                const data = await response.json();
-                addMessage(data.response, 'bot');
-            } catch (error) {
-                addMessage(`错误: ${error.message}`, 'bot');
-                console.error('Error:', error);
-            } finally {
-                btnText.style.display = 'inline';
-                btnLoading.style.display = 'none';
-                sendBtn.disabled = false;
-            }
+        // 打开设置（目前为占位功能）
+        function openSettings() {
+            alert('设置功能开发中...\n\n目前支持的功能:\n• 视频上传与检测\n• 批量处理\n• 报告导出');
         }
 
-        function addMessage(content, type) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.textContent = type === 'user' ? '👤' : '🤖';
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.textContent = content;
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(contentDiv);
-            
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function handleKeyDown(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        }
+        reviewRequirements.addEventListener('input', updateStartButton);
+        keywordInput.addEventListener('input', updateStartButton);
     </script>
 </body>
 </html>

@@ -42,6 +42,11 @@ REQUEST_TIMEOUT = 300  # 5分钟
 
 api_key = os.getenv('ARK_API_KEY')
 
+# 健康检查
+@app.get("/api/health")
+async def health_check():
+    return {"status": "ok"}
+
 # 创建异步客户端
 client = None
 
