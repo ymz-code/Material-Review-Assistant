@@ -271,14 +271,17 @@
         <div class="video-upload-section">
             <div class="upload-controls">
                 <button class="upload-btn" onclick="document.getElementById('videoInput').click()">
-                    📹 上传视频
+                    📹 上传视频（支持批量）
                 </button>
-                <input type="file" id="videoInput" accept="video/*" style="display: none" onchange="handleVideoSelect(event)">
+                <input type="file" id="videoInput" accept="video/*" multiple style="display: none" onchange="handleVideoSelect(event)">
                 <button id="detectKeywordsBtn" class="analyze-video-btn" onclick="showKeywordSection()" style="background: #17a2b8;">
                     🔎 检测关键词
                 </button>
                 <button id="reviewVideoBtn" class="analyze-video-btn" onclick="showReviewSection()" style="background: #ffc107; color: #333;">
                     📋 合规检测
+                </button>
+                <button id="batchReviewBtn" class="analyze-video-btn" onclick="showBatchReviewSection()" style="background: #6f42c1;">
+                    📚 批量检测
                 </button>
             </div>
             
@@ -323,6 +326,28 @@
                 <button onclick="hideReviewSection()" style="margin-left: 10px; padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">收起</button>
             </div>
             
+            <!-- 批量视频检测区域 -->
+            <div id="batchReviewSection" style="display: none; margin-top: 15px; padding: 15px; background: #e7f3ff; border-radius: 8px; border: 1px solid #b8daff;">
+                <div style="margin-bottom: 10px; font-weight: bold; color: #004085;">📚 批量视频合规检测</div>
+                <div style="margin-bottom: 10px;">
+                    <label style="font-size: 13px; color: #666; display: block; margin-bottom: 5px;">
+                        输入统一的检测要求（所有视频使用相同标准）：
+                    </label>
+                    <textarea id="batchReviewRequirements" placeholder="例如: 视频内容必须包含产品介绍，不能有敏感内容，画面清晰" 
+                              style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; min-height: 100px; resize: vertical;"></textarea>
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <div style="font-size: 13px; color: #666; margin-bottom: 5px;">📁 已选择的视频（<span id="batchVideoCount">0</span> 个）：</div>
+                    <div id="batchVideoList" style="max-height: 200px; overflow-y: auto; background: white; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        <div style="color: #999; text-align: center; padding: 20px;">暂无视频，请在上方上传</div>
+                    </div>
+                </div>
+                <button id="startBatchReviewBtn" class="analyze-video-btn" onclick="startBatchReview()" disabled style="background: #6f42c1;">
+                    🚀 开始批量检测
+                </button>
+                <button onclick="hideBatchReviewSection()" style="margin-left: 10px; padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 8px; cursor: pointer;">收起</button>
+            </div>
+            
             <!-- 已选择视频信息 -->
             <div id="selectedVideoInfo" style="display: none; margin-top: 15px; padding: 10px; background: #d4edda; border-radius: 8px; color: #155724;">
                 <span id="videoName"></span>
@@ -357,10 +382,15 @@
         const videoName = document.getElementById('videoName');
 
         let selectedVideo = null;
+        let selectedVideos = []; // 批量视频列表
         const keywordInput = document.getElementById('keywordInput');
         const startDetectBtn = document.getElementById('startDetectBtn');
         const reviewRequirements = document.getElementById('reviewRequirements');
         const startReviewBtn = document.getElementById('startReviewBtn');
+        const batchReviewRequirements = document.getElementById('batchReviewRequirements');
+        const startBatchReviewBtn = document.getElementById('startBatchReviewBtn');
+        const batchVideoList = document.getElementById('batchVideoList');
+        const batchVideoCount = document.getElementById('batchVideoCount');
 
         function showKeywordSection() {
             const section = document.getElementById('keywordSection');
@@ -388,6 +418,20 @@
             document.getElementById('reviewSection').style.display = 'none';
         }
 
+        function showBatchReviewSection() {
+            const section = document.getElementById('batchReviewSection');
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+            updateBatchVideoList();
+        }
+
+        function hideBatchReviewSection() {
+            document.getElementById('batchReviewSection').style.display = 'none';
+        }
+
         function addPresetKeyword(keyword) {
             const currentText = keywordInput.value.trim();
             if (currentText) {
@@ -413,10 +457,17 @@
             startReviewBtn.disabled = !selectedVideo || !requirements;
         }
 
+        function updateBatchReviewButton() {
+            const requirements = batchReviewRequirements.value.trim();
+            startBatchReviewBtn.disabled = selectedVideos.length === 0 || !requirements;
+        }
+
         // 监听关键词输入变化
         keywordInput.addEventListener('input', updateDetectButton);
         // 监听合规检测要求输入变化
         reviewRequirements.addEventListener('input', updateReviewButton);
+        // 监听批量检测要求输入变化
+        batchReviewRequirements.addEventListener('input', updateBatchReviewButton);
 
         async function detectKeywords() {
             if (!selectedVideo) {
@@ -534,17 +585,29 @@
         }
 
         function handleVideoSelect(event) {
-            const file = event.target.files[0];
-            if (file) {
-                selectedVideo = file;
+            const files = Array.from(event.target.files);
+            
+            if (files.length > 0) {
+                // 总是选择第一个视频作为当前视频
+                selectedVideo = files[0];
                 
-                // 显示已选择的视频信息
-                const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-                videoName.textContent = `📹 ${file.name} (${sizeMB} MB)`;
+                // 将所有视频添加到批量列表（避免重复）
+                files.forEach(file => {
+                    const isDuplicate = selectedVideos.some(v => v.name === file.name && v.size === file.size);
+                    if (!isDuplicate) {
+                        selectedVideos.push(file);
+                    }
+                });
+                
+                // 显示已选择的视频信息（单个）
+                const sizeMB = (selectedVideo.size / (1024 * 1024)).toFixed(2);
+                videoName.textContent = `📹 ${selectedVideo.name} (${sizeMB} MB)${selectedVideos.length > 1 ? ` 等${selectedVideos.length}个视频` : ''}`;
                 selectedVideoInfo.style.display = 'block';
                 
                 updateDetectButton(); // 更新关键词检测按钮状态
                 updateReviewButton(); // 更新合规检测按钮状态
+                updateBatchReviewButton(); // 更新批量检测按钮状态
+                updateBatchVideoList(); // 更新批量视频列表
             }
         }
 
@@ -554,6 +617,215 @@
             videoInput.value = '';
             updateDetectButton(); // 更新关键词检测按钮状态
             updateReviewButton(); // 更新合规检测按钮状态
+            updateBatchReviewButton(); // 更新批量检测按钮状态
+        }
+
+        function updateBatchVideoList() {
+            // 更新批量视频列表显示
+            if (selectedVideos.length === 0) {
+                batchVideoList.innerHTML = '<div style="color: #999; text-align: center; padding: 20px;">暂无视频，请在上方上传</div>';
+            } else {
+                batchVideoList.innerHTML = selectedVideos.map((video, index) => {
+                    const sizeMB = (video.size / (1024 * 1024)).toFixed(2);
+                    return `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee;">
+                            <div style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <span style="color: #666; font-size: 12px;">${index + 1}.</span> 
+                                <span style="color: #333;">📹 ${video.name}</span>
+                                <span style="color: #999; font-size: 11px;">(${sizeMB} MB)</span>
+                            </div>
+                            <button onclick="removeBatchVideo(${index})" style="padding: 3px 8px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 11px;">删除</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // 更新计数
+            batchVideoCount.textContent = selectedVideos.length;
+            updateBatchReviewButton();
+        }
+
+        function removeBatchVideo(index) {
+            const removedVideo = selectedVideos[index];
+            selectedVideos.splice(index, 1);
+            
+            // 如果删除的是当前选中的视频，更新当前视频
+            if (selectedVideo && selectedVideo.name === removedVideo.name && selectedVideo.size === removedVideo.size) {
+                selectedVideo = selectedVideos.length > 0 ? selectedVideos[0] : null;
+                if (selectedVideo) {
+                    const sizeMB = (selectedVideo.size / (1024 * 1024)).toFixed(2);
+                    videoName.textContent = `📹 ${selectedVideo.name} (${sizeMB} MB)${selectedVideos.length > 1 ? ` 等${selectedVideos.length}个视频` : ''}`;
+                    selectedVideoInfo.style.display = 'block';
+                } else {
+                    selectedVideoInfo.style.display = 'none';
+                }
+            } else {
+                // 更新显示文本
+                if (selectedVideo) {
+                    const sizeMB = (selectedVideo.size / (1024 * 1024)).toFixed(2);
+                    videoName.textContent = `📹 ${selectedVideo.name} (${sizeMB} MB)${selectedVideos.length > 1 ? ` 等${selectedVideos.length}个视频` : ''}`;
+                }
+            }
+            
+            updateBatchVideoList();
+            updateDetectButton();
+            updateReviewButton();
+            updateBatchReviewButton();
+        }
+
+        async function startBatchReview() {
+            if (selectedVideos.length === 0) {
+                alert('请先上传视频');
+                return;
+            }
+
+            const requirements = batchReviewRequirements.value.trim();
+            if (!requirements) {
+                alert('请输入检测要求');
+                return;
+            }
+
+            // 显示用户消息
+            addMessage(`[批量视频合规检测]\n检测要求: ${requirements}\n视频数量: ${selectedVideos.length}个`, 'user');
+
+            // 添加加载状态
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message bot';
+            loadingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                    <div id="progress-text">正在开始批量检测...</div>
+                </div>
+            `;
+            chatMessages.appendChild(loadingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            const results = [];
+            const totalVideos = selectedVideos.length;
+
+            try {
+                // 逐个检测视频
+                for (let i = 0; i < selectedVideos.length; i++) {
+                    const video = selectedVideos[i];
+                    
+                    // 更新进度
+                    const progressText = document.getElementById('progress-text');
+                    if (progressText) {
+                        progressText.textContent = `正在检测第 ${i + 1}/${totalVideos} 个视频: ${video.name}`;
+                    }
+                    
+                    try {
+                        const formData = new FormData();
+                        formData.append('requirements', requirements);
+                        formData.append('video', video);
+
+                        // 创建带超时的请求
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => {
+                            controller.abort();
+                        }, 300000); // 5分钟超时
+
+                        const response = await fetch('/api/review-video', {
+                            method: 'POST',
+                            body: formData,
+                            signal: controller.signal
+                        });
+
+                        clearTimeout(timeoutId);
+
+                        if (!response.ok) {
+                            let errorData;
+                            try {
+                                errorData = await response.json();
+                            } catch {
+                                errorData = { detail: `HTTP错误: ${response.status}` };
+                            }
+                            results.push({
+                                name: video.name,
+                                pass: false,
+                                error: errorData.detail || '检测失败'
+                            });
+                        } else {
+                            const data = await response.json();
+                            results.push({
+                                name: video.name,
+                                pass: data.pass,
+                                result: data.result,
+                                reasons: data.reasons || [],
+                                issues: data.issues || []
+                            });
+                        }
+                    } catch (error) {
+                        results.push({
+                            name: video.name,
+                            pass: false,
+                            error: error.name === 'AbortError' ? '检测超时' : error.message
+                        });
+                    }
+                }
+
+                // 移除加载状态
+                if (chatMessages.contains(loadingDiv)) {
+                    chatMessages.removeChild(loadingDiv);
+                }
+
+                // 格式化结果
+                let resultMessage = '📊 批量检测结果汇总\n\n';
+                
+                const passedVideos = results.filter(r => r.pass);
+                const failedVideos = results.filter(r => !r.pass);
+                
+                resultMessage += `✅ 通过: ${passedVideos.length} 个\n`;
+                resultMessage += `❌ 不通过: ${failedVideos.length} 个\n\n`;
+                resultMessage += `━━━━━━━━━━━━━━━\n\n`;
+                
+                // 显示不通过的视频（优先显示）
+                if (failedVideos.length > 0) {
+                    resultMessage += `❌ 不通过的视屏 (${failedVideos.length}个):\n`;
+                    failedVideos.forEach((video, index) => {
+                        resultMessage += `\n${index + 1}. ${video.name}\n`;
+                        if (video.error) {
+                            resultMessage += `   错误: ${video.error}\n`;
+                        } else if (video.issues && video.issues.length > 0) {
+                            resultMessage += `   问题:\n`;
+                            video.issues.forEach((issue, i) => {
+                                resultMessage += `   - ${issue}\n`;
+                            });
+                        }
+                    });
+                    resultMessage += '\n━━━━━━━━━━━━━━━\n\n';
+                }
+                
+                // 显示通过的视频
+                if (passedVideos.length > 0) {
+                    resultMessage += `✅ 通过的视屏 (${passedVideos.length}个):\n`;
+                    passedVideos.forEach((video, index) => {
+                        resultMessage += `\n${index + 1}. ${video.name}\n`;
+                        if (video.reasons && video.reasons.length > 0) {
+                            resultMessage += `   理由:\n`;
+                            video.reasons.forEach((reason, i) => {
+                                resultMessage += `   - ${reason}\n`;
+                            });
+                        }
+                    });
+                }
+                
+                addMessage(resultMessage, 'bot');
+                
+            } catch (error) {
+                // 移除加载状态
+                if (chatMessages.contains(loadingDiv)) {
+                    chatMessages.removeChild(loadingDiv);
+                }
+                
+                addMessage(`批量检测错误: ${error.message}`, 'bot');
+                console.error('Error:', error);
+            }
         }
 
         async function reviewVideo() {
