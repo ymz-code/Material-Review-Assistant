@@ -52,7 +52,6 @@
 
         .header-title { display: flex; flex-direction: column; }
         .header-title h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
-        .header-title p { font-size: 13px; opacity: 0.7; margin-top: 3px; color: #94a3b8; }
 
         .header-right { display: flex; align-items: center; gap: 20px; }
 
@@ -488,6 +487,148 @@
         .footer-item { display: flex; align-items: center; gap: 6px; }
         .footer-value { color: #0ea5e9; font-weight: 500; }
 
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: #1e293b;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 480px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            color: #f1f5f9;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-section h4 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: #f1f5f9;
+        }
+
+        .settings-desc {
+            margin: 0 0 16px 0;
+            font-size: 13px;
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .settings-stats {
+            display: flex;
+            gap: 16px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 16px;
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 12px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #0ea5e9;
+        }
+
+        .danger-btn {
+            width: 100%;
+            padding: 12px;
+            background: rgba(248, 113, 113, 0.15);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 8px;
+            color: #f87171;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .danger-btn:hover {
+            background: rgba(248, 113, 113, 0.25);
+            border-color: rgba(248, 113, 113, 0.5);
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            padding: 10px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: #f1f5f9;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
         @media (max-width: 900px) {
             .content-area { flex-direction: column; }
             .control-panel {
@@ -516,8 +657,7 @@
             <div class="header-left">
                 <div class="header-icon">🎯</div>
                 <div class="header-title">
-                    <h1>AI视频审核系统</h1>
-                    <p>基于豆包大模型 · 智能内容审核</p>
+                    <h1>AI 视频审核系统</h1>
                 </div>
             </div>
             <div class="header-right">
@@ -527,6 +667,7 @@
                 </div>
                 <div class="header-actions">
                     <button class="header-btn" onclick="generateReport()">📈 报告</button>
+                    <button class="header-btn" onclick="openSettings()">⚙️ 设置</button>
                 </div>
             </div>
         </div>
@@ -535,7 +676,6 @@
         <div class="nav-bar">
             <div class="nav-item active" onclick="switchMode('review')">✅ 合规检测</div>
             <div class="nav-item" onclick="switchMode('keyword')">🔍 关键词检测</div>
-            <div class="nav-item" onclick="switchMode('batch')">⚡ 批量检测</div>
         </div>
 
         <!-- 主内容区域 -->
@@ -588,14 +728,6 @@
                                 <span class="quick-tag" onclick="addKeyword('政治')">🏛️ 政治</span>
                             </div>
                         </div>
-
-                        <!-- 批量检测设置 -->
-                        <div id="batchSettings" style="display: none;">
-                            <div class="input-group">
-                                <label class="input-label">统一审核标准</label>
-                                <textarea id="batchRequirements" class="textarea-input" placeholder="所有视频使用此标准进行检测，例如：视频内容必须包含产品介绍，画面清晰，无敏感内容"></textarea>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -632,17 +764,38 @@
             </div>
         </div>
 
+        <!-- 设置弹窗 -->
+        <div class="modal-overlay" id="settingsModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>⚙️ 系统设置</h3>
+                    <button class="modal-close" onclick="closeSettings()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h4>数据存储</h4>
+                        <p class="settings-desc">系统会自动保存您的设置和检测结果，刷新页面后数据不会丢失。</p>
+                        <div class="settings-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">已保存记录</span>
+                                <span class="stat-value" id="storageCount">0 条</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="settings-section">
+                        <h4>清除数据</h4>
+                        <button class="danger-btn" onclick="confirmClearStorage()">🗑️ 清除所有存储数据</button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn" onclick="closeSettings()">关闭</button>
+                </div>
+            </div>
+        </div>
+
         <!-- 底部状态栏 -->
         <div class="footer">
             <div class="footer-left">
-                <div class="footer-item">
-                    <span>模型:</span>
-                    <span class="footer-value">doubao-seed-2-0-pro-260215</span>
-                </div>
-                <div class="footer-item">
-                    <span>版本:</span>
-                    <span>v1.0.0</span>
-                </div>
             </div>
             <div class="footer-right">
                 <div class="footer-item">
@@ -664,16 +817,16 @@
         let currentResults = [];
         let filterType = 'all';
 
+        const STORAGE_KEY = 'ai-video-review-data';
+
         const statusBadge = document.getElementById('statusBadge');
         const statusText = document.getElementById('statusText');
         const videoInput = document.getElementById('videoInput');
         const videoList = document.getElementById('videoList');
         const reviewRequirements = document.getElementById('reviewRequirements');
         const keywordInput = document.getElementById('keywordInput');
-        const batchRequirements = document.getElementById('batchRequirements');
-        const keywordSettings = document.getElementById('keywordSettings');
         const reviewSettings = document.getElementById('reviewSettings');
-        const batchSettings = document.getElementById('batchSettings');
+        const keywordSettings = document.getElementById('keywordSettings');
         const settingsTitle = document.getElementById('settingsTitle');
         const settingsArea = document.getElementById('settingsArea');
         const startBtn = document.getElementById('startBtn');
@@ -682,6 +835,40 @@
         const resultsCount = document.getElementById('resultsCount');
         const processedCountEl = document.getElementById('processedCount');
         const processingTimeEl = document.getElementById('processingTime');
+
+        function saveToStorage() {
+            const data = {
+                currentMode,
+                reviewRequirements: reviewRequirements.value,
+                keywordInput: keywordInput.value,
+                currentResults,
+                processedCount
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.currentMode) currentMode = data.currentMode;
+                    if (data.reviewRequirements !== undefined) reviewRequirements.value = data.reviewRequirements;
+                    if (data.keywordInput !== undefined) keywordInput.value = data.keywordInput;
+                    if (data.currentResults) currentResults = data.currentResults;
+                    if (data.processedCount !== undefined) {
+                        processedCount = data.processedCount;
+                        processedCountEl.textContent = processedCount;
+                    }
+                    switchMode(currentMode);
+                    if (currentResults.length > 0) renderResults(currentResults);
+                }
+            } catch (e) {
+                console.error('加载存储数据失败:', e);
+            }
+        }
+
+        setInterval(saveToStorage, 3000);
 
         function checkServiceStatus() {
             fetch('/api/health')
@@ -711,12 +898,10 @@
 
             reviewSettings.style.display = mode === 'review' ? 'block' : 'none';
             keywordSettings.style.display = mode === 'keyword' ? 'block' : 'none';
-            batchSettings.style.display = mode === 'batch' ? 'block' : 'none';
 
             const titles = {
                 review: '⚙️ 检测设置',
-                keyword: '🔍 关键词设置',
-                batch: '📦 批量检测设置'
+                keyword: '🔍 关键词设置'
             };
             settingsTitle.textContent = titles[mode];
             updateStartButton();
@@ -789,9 +974,6 @@
                 case 'keyword':
                     hasSettings = keywordInput.value.trim().length > 0;
                     break;
-                case 'batch':
-                    hasSettings = batchRequirements.value.trim().length > 0;
-                    break;
             }
 
             startBtn.disabled = !(hasVideos && hasSettings);
@@ -822,7 +1004,7 @@
                 }
             }
 
-            currentResults = results;
+            currentResults = [...currentResults, ...results];
             processedCount += results.length;
             processedCountEl.textContent = processedCount;
 
@@ -844,8 +1026,6 @@
                     formData.append('requirements', reviewRequirements.value);
                 } else if (currentMode === 'keyword') {
                     formData.append('keywords', keywordInput.value);
-                } else if (currentMode === 'batch') {
-                    formData.append('requirements', batchRequirements.value);
                 }
                 formData.append('mode', currentMode);
 
@@ -992,7 +1172,6 @@
             videoInput.value = '';
             reviewRequirements.value = '';
             keywordInput.value = '';
-            batchRequirements.value = '';
             renderVideoList();
             updateStartButton();
             resultsContent.innerHTML = `
@@ -1006,6 +1185,7 @@
             processingTimeEl.textContent = '0s';
             processedCount = 0;
             processedCountEl.textContent = '0';
+            localStorage.removeItem(STORAGE_KEY);
         }
 
         function generateReport() {
@@ -1014,7 +1194,8 @@
                 return;
             }
 
-            let csv = '视频名称,审核结果,AI回复\n';
+            const bom = '\uFEFF';
+            let csv = bom + '视频名称,审核结果,AI回复\n';
             currentResults.forEach(result => {
                 const name = `"${result.name.replace(/"/g, '""')}"`;
                 const status = result.status === 'pass' ? '通过' : '不通过';
@@ -1034,7 +1215,31 @@
 
         reviewRequirements.addEventListener('input', updateStartButton);
         keywordInput.addEventListener('input', updateStartButton);
-        batchRequirements.addEventListener('input', updateStartButton);
+
+        loadFromStorage();
+    </script>
+
+    <script>
+        function openSettings() {
+            document.getElementById('storageCount').textContent = `${currentResults.length} 条`;
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function confirmClearStorage() {
+            if (confirm('确定要清除所有存储的数据吗？此操作不可恢复！')) {
+                localStorage.removeItem('ai-video-review-data');
+                currentResults = [];
+                processedCount = 0;
+                processedCountEl.textContent = '0';
+                closeSettings();
+                renderResults(currentResults);
+                alert('数据已清除');
+            }
+        }
     </script>
 </body>
 </html>

@@ -481,7 +481,7 @@ async def analyze_video(
 - 如果无法准确判断时间点，请说明原因
 - 只返回JSON格式，不要有其他文字"""
         else:
-            # 合规检测（review 和 batch 模式）
+            # 合规检测模式
             if not requirements:
                 raise HTTPException(status_code=400, detail="请提供审核标准")
             
