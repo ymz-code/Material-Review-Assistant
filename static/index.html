@@ -5,12 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI视频审核系统</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
@@ -27,13 +23,12 @@
             height: 90vh;
             background: #1e293b;
             border-radius: 20px;
-            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* 顶部标题栏 */
         .header {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: white;
@@ -44,114 +39,55 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+        .header-left { display: flex; align-items: center; gap: 20px; }
 
         .header-icon {
-            width: 52px;
-            height: 52px;
+            width: 52px; height: 52px;
             background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
             border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-size: 26px;
             box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
         }
 
-        .header-title {
-            display: flex;
-            flex-direction: column;
-        }
+        .header-title { display: flex; flex-direction: column; }
+        .header-title h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+        .header-title p { font-size: 13px; opacity: 0.7; margin-top: 3px; color: #94a3b8; }
 
-        .header-title h1 {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .header-title p {
-            font-size: 13px;
-            opacity: 0.7;
-            margin-top: 3px;
-            color: #94a3b8;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+        .header-right { display: flex; align-items: center; gap: 20px; }
 
         .status-badge {
             padding: 8px 18px;
             background: rgba(34, 197, 94, 0.15);
             border-radius: 24px;
-            font-size: 13px;
-            color: #4ade80;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            transition: all 0.3s;
+            font-size: 13px; color: #4ade80;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 500; transition: all 0.3s;
         }
-
-        .status-badge.offline {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-        }
-
-        .status-badge.checking {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-        }
+        .status-badge.offline { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+        .status-badge.checking { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
 
         .status-dot {
-            width: 10px;
-            height: 10px;
-            background: #4ade80;
-            border-radius: 50%;
+            width: 10px; height: 10px;
+            background: #4ade80; border-radius: 50%;
             animation: pulse 2s infinite;
         }
+        .status-badge.offline .status-dot { background: #f87171; }
+        .status-badge.checking .status-dot { background: #fbbf24; }
 
-        .status-badge.offline .status-dot {
-            background: #f87171;
-        }
+        @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.9); } }
 
-        .status-badge.checking .status-dot {
-            background: #fbbf24;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.9); }
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-        }
-
+        .header-actions { display: flex; gap: 10px; }
         .header-btn {
             padding: 8px 16px;
             background: rgba(14, 165, 233, 0.15);
             border: 1px solid rgba(14, 165, 233, 0.3);
-            border-radius: 8px;
-            color: #0ea5e9;
-            font-size: 13px;
-            cursor: pointer;
+            border-radius: 8px; color: #0ea5e9;
+            font-size: 13px; cursor: pointer;
             transition: all 0.2s;
         }
+        .header-btn:hover { background: rgba(14, 165, 233, 0.25); border-color: #0ea5e9; }
 
-        .header-btn:hover {
-            background: rgba(14, 165, 233, 0.25);
-            border-color: #0ea5e9;
-        }
-
-        /* 功能导航栏 */
         .nav-bar {
             display: flex;
             background: #0f172a;
@@ -162,344 +98,177 @@
         .nav-item {
             padding: 18px 30px;
             color: #64748b;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.25s;
+            font-size: 14px; font-weight: 500;
+            cursor: pointer; transition: all 0.25s;
             position: relative;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            display: flex; align-items: center; gap: 10px;
         }
-
-        .nav-item:hover {
-            color: #f1f5f9;
-            background: rgba(14, 165, 233, 0.08);
-        }
-
-        .nav-item.active {
-            color: #0ea5e9;
-            background: rgba(14, 165, 233, 0.1);
-        }
-
+        .nav-item:hover { color: #f1f5f9; background: rgba(14, 165, 233, 0.08); }
+        .nav-item.active { color: #0ea5e9; background: rgba(14, 165, 233, 0.1); }
         .nav-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 25%;
-            right: 25%;
+            content: ''; position: absolute; bottom: 0; left: 25%; right: 25%;
             height: 3px;
             background: linear-gradient(90deg, #0ea5e9, #06b6d4);
             border-radius: 3px;
         }
 
-        /* 主内容区域 */
         .content-area {
             flex: 1;
             display: flex;
             overflow: hidden;
         }
 
-        /* 左侧控制面板 */
         .control-panel {
-            width: 380px;
+            width: 400px;
             background: #0f172a;
             border-right: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 24px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
         }
 
         .panel-section {
-            margin-bottom: 28px;
+            margin-bottom: 20px;
         }
 
         .section-title {
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 14px; font-weight: 600;
             color: #94a3b8;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
         }
 
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 16px;
-            background: linear-gradient(180deg, #0ea5e9, #06b6d4);
-            border-radius: 2px;
-        }
-
-        /* 视频上传区域 */
         .upload-area {
-            border: 2px dashed #334155;
-            border-radius: 14px;
-            padding: 30px;
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 30px 20px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.35s;
-            background: rgba(255, 255, 255, 0.02);
-            position: relative;
-            overflow: hidden;
+            transition: all 0.3s;
+            display: block;
         }
-
-        .upload-area::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        .upload-area:hover::before,
-        .upload-area.dragover::before {
-            left: 100%;
-        }
-
         .upload-area:hover {
-            border-color: #0ea5e9;
-            background: rgba(14, 165, 233, 0.06);
-            transform: translateY(-2px);
+            border-color: rgba(14, 165, 233, 0.5);
+            background: rgba(14, 165, 233, 0.05);
         }
 
-        .upload-area.dragover {
-            border-color: #0ea5e9;
-            background: rgba(14, 165, 233, 0.12);
-            transform: scale(1.02);
-        }
-
-        .upload-icon {
-            font-size: 44px;
-            margin-bottom: 16px;
-            opacity: 0.7;
-            transition: transform 0.3s;
-        }
-
-        .upload-area:hover .upload-icon {
-            transform: scale(1.1);
-        }
-
+        .upload-icon { font-size: 36px; margin-bottom: 12px; }
         .upload-text {
-            font-size: 15px;
-            color: #f1f5f9;
+            font-size: 14px; color: #f1f5f9;
             margin-bottom: 8px;
-            font-weight: 500;
         }
-
         .upload-hint {
-            font-size: 13px;
-            color: #64748b;
+            font-size: 12px; color: #64748b;
             line-height: 1.5;
         }
 
-        #videoInput {
-            display: none;
-        }
+        #videoInput { display: none; }
 
-        /* 已选择视频列表 */
         .video-list {
-            max-height: 220px;
+            max-height: 200px;
             overflow-y: auto;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 10px;
-            padding: 6px;
-        }
-
-        .video-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .video-list::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
-        }
-
-        .video-list::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 8px;
         }
 
         .video-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 14px;
-            background: #1e293b;
-            border-radius: 10px;
-            margin-bottom: 6px;
-            cursor: pointer;
-            transition: all 0.25s;
-            border: 1px solid transparent;
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
         }
-
-        .video-item:hover {
-            background: #334155;
-            transform: translateX(4px);
-        }
-
-        .video-item.selected {
-            border-color: #0ea5e9;
-            background: rgba(14, 165, 233, 0.1);
-        }
+        .video-item:hover { background: rgba(255, 255, 255, 0.06); }
 
         .video-thumb {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #334155, #475569);
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
         }
 
-        .video-info {
-            flex: 1;
-            min-width: 0;
-        }
-
+        .video-info { flex: 1; min-width: 0; }
         .video-name {
-            font-size: 14px;
-            color: #f1f5f9;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            font-weight: 500;
+            font-size: 13px; color: #f1f5f9;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
-
         .video-meta {
-            font-size: 11px;
-            color: #64748b;
-            margin-top: 3px;
-            display: flex;
-            gap: 8px;
-        }
-
-        .video-size {
-            display: flex;
-            align-items: center;
-            gap: 3px;
+            font-size: 11px; color: #64748b;
+            margin-top: 2px;
+            display: flex; gap: 12px;
         }
 
         .video-remove {
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #64748b;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.2s;
-            flex-shrink: 0;
-            opacity: 0;
-        }
-
-        .video-item:hover .video-remove {
-            opacity: 1;
-        }
-
-        .video-remove:hover {
-            background: #dc2626;
-            color: white;
-        }
-
-        /* 检测设置区域 */
-        .settings-area {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .setting-item {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .setting-label {
-            font-size: 13px;
             color: #94a3b8;
-            font-weight: 500;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .video-remove:hover { color: #f87171; background: rgba(239, 68, 68, 0.1); }
+
+        .input-group { margin-bottom: 12px; }
+        .input-label {
+            font-size: 13px; color: #94a3b8;
+            margin-bottom: 6px;
+            display: block;
         }
 
-        .setting-input {
-            padding: 12px 14px;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 10px;
+        .text-input, .textarea-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
             color: #f1f5f9;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.25s;
+            font-size: 13px;
             font-family: inherit;
+            transition: all 0.2s;
         }
-
-        .setting-input:focus {
+        .text-input:focus, .textarea-input:focus {
+            outline: none;
             border-color: #0ea5e9;
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
         }
 
-        .setting-input::placeholder {
-            color: #64748b;
-        }
-
-        .setting-textarea {
-            min-height: 120px;
+        .textarea-input {
+            min-height: 100px;
             resize: vertical;
-            line-height: 1.5;
         }
 
-        /* 快速关键词标签 */
         .quick-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+            display: flex; flex-wrap: wrap; gap: 8px;
+            margin-top: 10px;
         }
 
         .quick-tag {
-            padding: 6px 14px;
-            background: #1e293b;
-            border: 1px solid #334155;
+            padding: 6px 12px;
+            background: rgba(14, 165, 233, 0.15);
             border-radius: 20px;
             font-size: 12px;
-            color: #94a3b8;
+            color: #0ea5e9;
             cursor: pointer;
-            transition: all 0.25s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            transition: all 0.2s;
         }
+        .quick-tag:hover { background: rgba(14, 165, 233, 0.25); }
 
-        .quick-tag:hover {
-            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
-            border-color: #0ea5e9;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-        }
-
-        /* 操作按钮 */
         .action-btn {
-            padding: 14px 24px;
+            width: 100%;
+            padding: 14px;
             border: none;
-            border-radius: 12px;
-            font-size: 15px;
+            border-radius: 10px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.25s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .action-btn-primary {
@@ -507,37 +276,26 @@
             color: white;
             box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
         }
-
         .action-btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
         }
-
-        .action-btn-primary:active {
-            transform: translateY(0);
-        }
-
         .action-btn-primary:disabled {
-            background: #334155;
+            opacity: 0.5;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
-            opacity: 0.6;
         }
 
         .action-btn-secondary {
-            background: #1e293b;
+            background: rgba(255, 255, 255, 0.05);
             color: #94a3b8;
-            border: 1px solid #334155;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
         .action-btn-secondary:hover {
-            background: #334155;
+            background: rgba(255, 255, 255, 0.1);
             color: #f1f5f9;
-            border-color: #475569;
         }
 
-        /* 右侧结果区域 */
         .results-panel {
             flex: 1;
             display: flex;
@@ -546,516 +304,208 @@
         }
 
         .results-header {
-            padding: 20px 24px;
-            background: #1e293b;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.03);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        .results-title-row {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
         .results-title {
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 14px; font-weight: 600;
             color: #f1f5f9;
         }
 
-        .results-count {
-            font-size: 13px;
-            color: #64748b;
-            padding: 4px 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-        }
-
         .results-filter {
-            display: flex;
-            gap: 8px;
+            display: flex; gap: 8px;
         }
 
         .filter-btn {
-            padding: 8px 16px;
-            background: transparent;
-            border: 1px solid #334155;
-            border-radius: 8px;
+            padding: 6px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 12px;
             color: #94a3b8;
-            font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
         }
-
-        .filter-btn:hover {
-            background: rgba(14, 165, 233, 0.1);
-            border-color: #0ea5e9;
-            color: #0ea5e9;
-        }
-
         .filter-btn.active {
             background: rgba(14, 165, 233, 0.15);
-            border-color: #0ea5e9;
+            border-color: rgba(14, 165, 233, 0.3);
             color: #0ea5e9;
         }
 
         .results-content {
             flex: 1;
             overflow-y: auto;
-            padding: 24px;
-            background: #0f172a;
+            padding: 20px;
         }
 
-        /* 统计面板 */
+        .empty-state {
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            height: 300px;
+            color: #64748b;
+        }
+
+        .empty-icon { font-size: 48px; margin-bottom: 16px; }
+        .empty-title {
+            font-size: 16px; font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+        .empty-hint { font-size: 13px; text-align: center; }
+
         .stats-panel {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border-radius: 14px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            border-radius: 0 14px 14px 0;
-        }
-
-        .stat-card.total::before {
-            background: linear-gradient(180deg, #0ea5e9, #06b6d4);
-        }
-
-        .stat-card.pass::before {
-            background: linear-gradient(180deg, #22c55e, #16a34a);
-        }
-
-        .stat-card.fail::before {
-            background: linear-gradient(180deg, #ef4444, #dc2626);
-        }
-
-        .stat-card.rate::before {
-            background: linear-gradient(180deg, #f59e0b, #d97706);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .stat-icon {
-            font-size: 24px;
-            margin-bottom: 10px;
-            opacity: 0.8;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #f1f5f9;
-            line-height: 1.2;
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #64748b;
-            margin-top: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-card.pass .stat-value {
-            color: #22c55e;
-        }
-
-        .stat-card.fail .stat-value {
-            color: #ef4444;
-        }
-
-        .stat-card.rate .stat-value {
-            color: #f59e0b;
-        }
-
-        /* 审核结果卡片 */
-        .result-card {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border-radius: 14px;
-            padding: 22px;
-            margin-bottom: 16px;
-            border-left: 5px solid transparent;
-            transition: all 0.3s;
-            border: 1px solid rgba(255, 255, 255, 0.03);
-        }
-
-        .result-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        .result-card.pass {
-            border-left-color: #22c55e;
-        }
-
-        .result-card.fail {
-            border-left-color: #ef4444;
-        }
-
-        .result-card.processing {
-            border-left-color: #f59e0b;
-        }
-
-        .result-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 18px;
-        }
-
-        .result-video-info {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .result-video-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #334155, #475569);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            flex-shrink: 0;
-        }
-
-        .result-video-detail {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .result-video-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #f1f5f9;
-        }
-
-        .result-video-meta {
-            font-size: 12px;
-            color: #64748b;
-        }
-
-        .result-status-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .result-status {
-            padding: 8px 18px;
-            border-radius: 24px;
-            font-size: 13px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .result-status.pass {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-        }
-
-        .result-status.fail {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-        }
-
-        .result-status.processing {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-        }
-
-        .result-score {
-            font-size: 12px;
-            color: #64748b;
-            padding: 4px 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-        }
-
-        .result-content {
-            margin-bottom: 18px;
-        }
-
-        .result-section {
-            margin-bottom: 14px;
-        }
-
-        .result-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .result-section-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: #64748b;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .result-section-title::before {
-            content: '';
-            width: 3px;
-            height: 12px;
-            background: #0ea5e9;
-            border-radius: 2px;
-        }
-
-        .result-section-content {
-            font-size: 14px;
-            color: #f1f5f9;
-            line-height: 1.6;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 12px 14px;
-            border-radius: 8px;
-        }
-
-        .result-list {
-            list-style: none;
-            padding-left: 0;
-        }
-
-        .result-list-item {
-            font-size: 14px;
-            color: #94a3b8;
-            padding: 10px 14px;
-            margin-bottom: 6px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        .result-list-item:hover {
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateX(4px);
-        }
-
-        .result-list-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 3px;
-            height: 100%;
-            border-radius: 0 3px 3px 0;
-            background: #0ea5e9;
-        }
-
-        .result-list-item.warning::before {
-            background: #f59e0b;
-        }
-
-        .result-list-item.error::before {
-            background: #ef4444;
-        }
-
-        .result-list-item.success::before {
-            background: #22c55e;
-        }
-
-        .result-list-item strong {
-            color: #f1f5f9;
-            margin-right: 8px;
-        }
-
-        /* 空状态 */
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #64748b;
-            padding: 40px;
-        }
-
-        .empty-icon {
-            font-size: 80px;
-            opacity: 0.2;
-            margin-bottom: 24px;
-            animation: float 3s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        .empty-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #94a3b8;
-        }
-
-        .empty-hint {
-            font-size: 14px;
-            text-align: center;
-            line-height: 1.6;
-            max-width: 320px;
-        }
-
-        /* 加载动画 */
-        .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 60px;
-        }
-
-        .loading-spinner {
-            width: 48px;
-            height: 48px;
-            border: 4px solid rgba(14, 165, 233, 0.1);
-            border-top-color: #0ea5e9;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex; flex-direction: column;
+            align-items: center;
         }
 
-        .loading-text {
-            font-size: 15px;
+        .stat-icon { font-size: 24px; margin-bottom: 8px; }
+        .stat-value {
+            font-size: 32px; font-weight: 700;
+            color: #f1f5f9;
+        }
+        .stat-label { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+        .stat-card.pass .stat-value { color: #4ade80; }
+        .stat-card.fail .stat-value { color: #f87171; }
+        .stat-card.rate .stat-value { color: #0ea5e9; }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border-left: 4px solid rgba(14, 165, 233, 0.5);
+        }
+        .result-card.pass { border-left-color: #4ade80; }
+        .result-card.fail { border-left-color: #f87171; }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .result-video-info {
+            display: flex; gap: 12px;
+        }
+
+        .result-video-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+
+        .result-video-detail { display: flex; flex-direction: column; }
+        .result-video-name {
+            font-size: 14px; font-weight: 600;
+            color: #f1f5f9;
+        }
+        .result-video-meta {
+            font-size: 12px; color: #64748b;
+            margin-top: 4px;
+        }
+
+        .result-status-row { display: flex; gap: 12px; align-items: center; }
+
+        .result-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px; font-weight: 500;
+        }
+        .result-status.pass {
+            background: rgba(74, 222, 128, 0.15);
+            color: #4ade80;
+        }
+        .result-status.fail {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+        }
+
+        .result-score {
+            font-size: 12px; color: #0ea5e9;
+        }
+
+        .result-content {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .result-section { margin-bottom: 12px; }
+        .result-section:last-child { margin-bottom: 0; }
+
+        .result-section-title {
+            font-size: 12px; font-weight: 600;
             color: #94a3b8;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
-        .loading-progress {
-            width: 200px;
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
+        .result-text {
+            font-size: 13px; color: #e2e8f0;
+            line-height: 1.6;
+            white-space: pre-wrap;
         }
 
-        .loading-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #0ea5e9, #06b6d4);
-            border-radius: 3px;
-            animation: progress 2s ease-in-out infinite;
+        .timestamps-list {
+            display: flex; flex-wrap: wrap; gap: 8px;
         }
 
-        @keyframes progress {
-            0% { width: 0%; }
-            50% { width: 70%; }
-            100% { width: 100%; }
+        .timestamp-tag {
+            padding: 4px 10px;
+            background: rgba(14, 165, 233, 0.15);
+            border-radius: 6px;
+            font-size: 12px;
+            color: #0ea5e9;
         }
 
-        /* 底部状态栏 */
         .footer {
             padding: 14px 24px;
-            background: #1e293b;
+            background: rgba(255, 255, 255, 0.03);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 13px;
-            color: #64748b;
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 13px; color: #64748b;
         }
 
-        .footer-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
+        .footer-left, .footer-right { display: flex; align-items: center; gap: 20px; }
+        .footer-item { display: flex; align-items: center; gap: 6px; }
+        .footer-value { color: #0ea5e9; font-weight: 500; }
 
-        .footer-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .footer-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .footer-value {
-            color: #0ea5e9;
-            font-weight: 500;
-        }
-
-        /* 响应式设计 */
         @media (max-width: 900px) {
-            .content-area {
-                flex-direction: column;
-            }
-
+            .content-area { flex-direction: column; }
             .control-panel {
                 width: 100%;
                 border-right: none;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.05);
                 max-height: 50%;
             }
-
-            .stats-panel {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            .stats-panel { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 600px) {
-            .main-container {
-                height: 95vh;
-                border-radius: 12px;
-            }
-
-            .header {
-                padding: 16px 20px;
-            }
-
-            .header-title h1 {
-                font-size: 18px;
-            }
-
-            .nav-item {
-                padding: 14px 16px;
-                font-size: 12px;
-            }
-
-            .stats-panel {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-
-            .stat-value {
-                font-size: 24px;
-            }
+            .main-container { height: 95vh; border-radius: 12px; }
+            .header { padding: 16px 20px; }
+            .header-title h1 { font-size: 18px; }
+            .nav-item { padding: 14px 16px; font-size: 12px; }
+            .stats-panel { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .stat-value { font-size: 24px; }
         }
     </style>
 </head>
@@ -1064,7 +514,7 @@
         <!-- 顶部标题栏 -->
         <div class="header">
             <div class="header-left">
-                <div class="header-icon">🔍</div>
+                <div class="header-icon">🎯</div>
                 <div class="header-title">
                     <h1>AI视频审核系统</h1>
                     <p>基于豆包大模型 · 智能内容审核</p>
@@ -1076,17 +526,16 @@
                     <span id="statusText">检测中</span>
                 </div>
                 <div class="header-actions">
-                    <button class="header-btn" onclick="generateReport()">📊 报告</button>
-                    <button class="header-btn" onclick="openSettings()">⚙️ 设置</button>
+                    <button class="header-btn" onclick="generateReport()">📈 报告</button>
                 </div>
             </div>
         </div>
 
         <!-- 功能导航栏 -->
         <div class="nav-bar">
-            <div class="nav-item active" onclick="switchMode('review')">📋 合规检测</div>
-            <div class="nav-item" onclick="switchMode('keyword')">🔎 关键词检测</div>
-            <div class="nav-item" onclick="switchMode('batch')">📚 批量检测</div>
+            <div class="nav-item active" onclick="switchMode('review')">✅ 合规检测</div>
+            <div class="nav-item" onclick="switchMode('keyword')">🔍 关键词检测</div>
+            <div class="nav-item" onclick="switchMode('batch')">⚡ 批量检测</div>
         </div>
 
         <!-- 主内容区域 -->
@@ -1095,44 +544,56 @@
             <div class="control-panel">
                 <!-- 视频上传 -->
                 <div class="panel-section">
-                    <div class="section-title">视频文件</div>
+                    <div class="section-title">📁 视频文件</div>
                     <label class="upload-area" for="videoInput">
-                        <div class="upload-icon">📹</div>
+                        <div class="upload-icon">🎬</div>
                         <div class="upload-text">点击或拖拽上传视频</div>
-                        <div class="upload-hint">支持 MP4, AVI, MOV 等格式<br>单文件最大50MB</div>
+                        <div class="upload-hint">支持 MP4, AVI, MOV 等格式<br>单文件最大512MB</div>
                     </label>
                     <input type="file" id="videoInput" accept="video/*" multiple onchange="handleVideoSelect(event)">
                 </div>
 
                 <!-- 已选择视频列表 -->
                 <div class="panel-section">
-                    <div class="section-title">已选择视频</div>
-                    <div id="videoList" class="video-list">
+                    <div class="section-title">📋 已选择视频</div>
+                    <div class="video-list" id="videoList">
                         <div style="text-align: center; padding: 24px; color: #64748b; font-size: 13px;">暂无视频</div>
                     </div>
                 </div>
 
                 <!-- 检测设置 -->
-                <div class="panel-section">
-                    <div class="section-title" id="settingsTitle">检测要求</div>
-                    <div class="settings-area" id="settingsArea">
+                <div class="panel-section" id="settingsSection">
+                    <div class="section-title" id="settingsTitle">⚙️ 检测设置</div>
+                    <div id="settingsArea">
                         <!-- 合规检测设置 -->
-                        <div class="setting-item">
-                            <label class="setting-label">审核标准</label>
-                            <textarea id="reviewRequirements" class="setting-input setting-textarea" placeholder="请输入视频审核要求，例如：&#10;- 视频内容不得包含敏感信息&#10;- 视频时长不少于30秒&#10;- 画面需清晰可辨&#10;- 不得出现违规行为"></textarea>
+                        <div id="reviewSettings">
+                            <div class="input-group">
+                                <label class="input-label">审核标准</label>
+                                <textarea id="reviewRequirements" class="textarea-input" placeholder="请输入视频审核标准，例如：视频内容必须积极健康，不能包含敏感内容、暴力、色情等不良信息"></textarea>
+                            </div>
                         </div>
-                        
+
                         <!-- 关键词检测设置 -->
-                        <div class="setting-item" id="keywordSettings" style="display: none;">
-                            <label class="setting-label">检测关键词</label>
-                            <input type="text" id="keywordInput" class="setting-input" placeholder="请输入要检测的关键词，用逗号分隔">
+                        <div id="keywordSettings" style="display: none;">
+                            <div class="input-group">
+                                <label class="input-label">检测关键词</label>
+                                <input type="text" id="keywordInput" class="text-input" placeholder="输入关键词，用逗号分隔">
+                            </div>
                             <div class="quick-tags">
-                                <span class="quick-tag" onclick="addKeyword('敏感词')">🔴 敏感词</span>
+                                <span class="quick-tag" onclick="addKeyword('敏感词')">🚫 敏感词</span>
                                 <span class="quick-tag" onclick="addKeyword('违规')">⚠️ 违规</span>
-                                <span class="quick-tag" onclick="addKeyword('广告')">📢 广告</span>
-                                <span class="quick-tag" onclick="addKeyword('暴力')">💥 暴力</span>
-                                <span class="quick-tag" onclick="addKeyword('色情')">🔞 色情</span>
+                                <span class="quick-tag" onclick="addKeyword('广告')">📣 广告</span>
+                                <span class="quick-tag" onclick="addKeyword('暴力')">💣 暴力</span>
+                                <span class="quick-tag" onclick="addKeyword('色情')">🔥 色情</span>
                                 <span class="quick-tag" onclick="addKeyword('政治')">🏛️ 政治</span>
+                            </div>
+                        </div>
+
+                        <!-- 批量检测设置 -->
+                        <div id="batchSettings" style="display: none;">
+                            <div class="input-group">
+                                <label class="input-label">统一审核标准</label>
+                                <textarea id="batchRequirements" class="textarea-input" placeholder="所有视频使用此标准进行检测，例如：视频内容必须包含产品介绍，画面清晰，无敏感内容"></textarea>
                             </div>
                         </div>
                     </div>
@@ -1141,32 +602,29 @@
                 <!-- 操作按钮 -->
                 <div class="panel-section" style="margin-top: auto;">
                     <button id="startBtn" class="action-btn action-btn-primary" onclick="startDetection()" disabled>
-                        <span>🚀</span>
+                        <span>✨</span>
                         <span id="btnText">开始检测</span>
                     </button>
                     <button class="action-btn action-btn-secondary" onclick="clearAll()" style="margin-top: 10px;">
-                        <span>🗑️</span>
+                        <span>🔄</span>
                         <span>清空所有</span>
                     </button>
                 </div>
             </div>
 
-            <!-- 右侧结果区域 -->
+            <!-- 右侧结果面板 -->
             <div class="results-panel">
                 <div class="results-header">
-                    <div class="results-title-row">
-                        <div class="results-title">审核结果</div>
-                        <div class="results-count" id="resultsCount">共 0 个视频</div>
-                    </div>
+                    <div class="results-title" id="resultsCount">共 0 个视频</div>
                     <div class="results-filter">
-                        <button class="filter-btn active" onclick="filterResults('all')">全部</button>
-                        <button class="filter-btn" onclick="filterResults('pass')">✅ 通过</button>
-                        <button class="filter-btn" onclick="filterResults('fail')">❌ 不通过</button>
+                        <button class="filter-btn active" onclick="setFilter('all')">全部</button>
+                        <button class="filter-btn" onclick="setFilter('pass')">✅ 通过</button>
+                        <button class="filter-btn" onclick="setFilter('fail')">❌ 不通过</button>
                     </div>
                 </div>
                 <div class="results-content" id="resultsContent">
                     <div class="empty-state">
-                        <div class="empty-icon">📊</div>
+                        <div class="empty-icon">📈</div>
                         <div class="empty-title">暂无审核结果</div>
                         <div class="empty-hint">上传视频并设置检测条件后，点击"开始检测"获取结果</div>
                     </div>
@@ -1190,11 +648,10 @@
                 <div class="footer-item">
                     <span>已处理:</span>
                     <span class="footer-value" id="processedCount">0</span>
-                    <span>个视频</span>
                 </div>
                 <div class="footer-item">
-                    <span>用时:</span>
-                    <span id="processingTime">0s</span>
+                    <span>耗时:</span>
+                    <span class="footer-value" id="processingTime">0s</span>
                 </div>
             </div>
         </div>
@@ -1213,7 +670,10 @@
         const videoList = document.getElementById('videoList');
         const reviewRequirements = document.getElementById('reviewRequirements');
         const keywordInput = document.getElementById('keywordInput');
+        const batchRequirements = document.getElementById('batchRequirements');
         const keywordSettings = document.getElementById('keywordSettings');
+        const reviewSettings = document.getElementById('reviewSettings');
+        const batchSettings = document.getElementById('batchSettings');
         const settingsTitle = document.getElementById('settingsTitle');
         const settingsArea = document.getElementById('settingsArea');
         const startBtn = document.getElementById('startBtn');
@@ -1223,94 +683,60 @@
         const processedCountEl = document.getElementById('processedCount');
         const processingTimeEl = document.getElementById('processingTime');
 
-        // 服务状态检测
-        function updateServiceStatus(status) {
-            statusBadge.classList.remove('checking', 'offline');
-            
-            switch(status) {
-                case 'checking':
-                    statusBadge.classList.add('checking');
-                    statusText.textContent = '检测中';
-                    break;
-                case 'online':
-                    statusText.textContent = '服务正常';
-                    break;
-                case 'offline':
-                    statusBadge.classList.add('offline');
-                    statusText.textContent = '服务异常';
-                    break;
-            }
-        }
-
-        async function checkServiceStatus() {
-            updateServiceStatus('checking');
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
-                
-                const response = await fetch('/api/health', {
-                    method: 'GET',
-                    signal: controller.signal
+        function checkServiceStatus() {
+            fetch('/api/health')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        statusBadge.className = 'status-badge';
+                        statusText.textContent = '服务正常';
+                    } else {
+                        statusBadge.className = 'status-badge offline';
+                        statusText.textContent = '服务异常';
+                    }
+                })
+                .catch(() => {
+                    statusBadge.className = 'status-badge offline';
+                    statusText.textContent = '服务不可用';
                 });
-                
-                clearTimeout(timeoutId);
-                
-                if (response.ok) {
-                    updateServiceStatus('online');
-                } else {
-                    updateServiceStatus('offline');
-                }
-            } catch (error) {
-                updateServiceStatus('offline');
-            }
         }
 
-        // 启动定期检测
-        checkServiceStatus();
         setInterval(checkServiceStatus, 5000);
+        checkServiceStatus();
 
-        // 切换模式
         function switchMode(mode) {
             currentMode = mode;
-            
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             document.querySelector(`.nav-item[onclick="switchMode('${mode}')"]`).classList.add('active');
 
-            if (mode === 'review') {
-                settingsTitle.textContent = '检测要求';
-                reviewRequirements.style.display = 'block';
-                keywordSettings.style.display = 'none';
-            } else if (mode === 'keyword') {
-                settingsTitle.textContent = '关键词设置';
-                reviewRequirements.style.display = 'none';
-                keywordSettings.style.display = 'block';
-            } else if (mode === 'batch') {
-                settingsTitle.textContent = '批量检测要求';
-                reviewRequirements.style.display = 'block';
-                keywordSettings.style.display = 'none';
-            }
+            reviewSettings.style.display = mode === 'review' ? 'block' : 'none';
+            keywordSettings.style.display = mode === 'keyword' ? 'block' : 'none';
+            batchSettings.style.display = mode === 'batch' ? 'block' : 'none';
 
+            const titles = {
+                review: '⚙️ 检测设置',
+                keyword: '🔍 关键词设置',
+                batch: '📦 批量检测设置'
+            };
+            settingsTitle.textContent = titles[mode];
             updateStartButton();
         }
 
-        // 处理视频选择
         function handleVideoSelect(event) {
             const files = Array.from(event.target.files);
+            const MAX_SIZE = 512 * 1024 * 1024;
             
             files.forEach(file => {
                 const isDuplicate = selectedVideos.some(v => v.name === file.name && v.size === file.size);
-                if (!isDuplicate) {
+                if (!isDuplicate && file.size <= MAX_SIZE) {
                     selectedVideos.push(file);
                 }
             });
-
+            event.target.value = '';
             renderVideoList();
             updateStartButton();
         }
 
-        // 渲染视频列表
         function renderVideoList() {
             if (selectedVideos.length === 0) {
                 videoList.innerHTML = '<div style="text-align: center; padding: 24px; color: #64748b; font-size: 13px;">暂无视频</div>';
@@ -1322,263 +748,184 @@
                 const date = new Date(video.lastModified).toLocaleDateString('zh-CN');
                 return `
                     <div class="video-item" data-index="${index}">
-                        <div class="video-thumb">🎬</div>
+                        <div class="video-thumb">🎥</div>
                         <div class="video-info">
                             <div class="video-name">${video.name}</div>
                             <div class="video-meta">
-                                <span class="video-size">📦 ${sizeMB} MB</span>
-                                <span>📅 ${date}</span>
+                                <span class="video-size">💾 ${sizeMB} MB</span>
+                                <span>🕐 ${date}</span>
                             </div>
                         </div>
-                        <div class="video-remove" onclick="removeVideo(${index})">✕</div>
+                        <div class="video-remove" onclick="removeVideo(${index})">✖️</div>
                     </div>
                 `;
             }).join('');
         }
 
-        // 移除视频
         function removeVideo(index) {
             selectedVideos.splice(index, 1);
             renderVideoList();
             updateStartButton();
         }
 
-        // 添加关键词
         function addKeyword(keyword) {
-            const currentValue = keywordInput.value.trim();
-            if (currentValue) {
-                const keywords = currentValue.split(',').map(k => k.trim());
-                if (!keywords.includes(keyword)) {
-                    keywordInput.value = currentValue + ', ' + keyword;
-                }
-            } else {
-                keywordInput.value = keyword;
+            const current = keywordInput.value;
+            const keywords = current ? current.split(',').map(k => k.trim()).filter(k => k) : [];
+            if (!keywords.includes(keyword)) {
+                keywords.push(keyword);
+                keywordInput.value = keywords.join(', ');
             }
             updateStartButton();
         }
 
-        // 更新开始按钮状态
         function updateStartButton() {
             const hasVideos = selectedVideos.length > 0;
             let hasSettings = false;
 
-            if (currentMode === 'review' || currentMode === 'batch') {
-                hasSettings = reviewRequirements.value.trim().length > 0;
-            } else if (currentMode === 'keyword') {
-                hasSettings = keywordInput.value.trim().length > 0;
+            switch(currentMode) {
+                case 'review':
+                    hasSettings = reviewRequirements.value.trim().length > 0;
+                    break;
+                case 'keyword':
+                    hasSettings = keywordInput.value.trim().length > 0;
+                    break;
+                case 'batch':
+                    hasSettings = batchRequirements.value.trim().length > 0;
+                    break;
             }
 
             startBtn.disabled = !(hasVideos && hasSettings);
+            btnText.textContent = hasVideos && hasSettings ? '开始检测' : '请上传视频并设置检测条件';
         }
 
-        // 清空所有
-        function clearAll() {
-            selectedVideos = [];
-            currentResults = [];
-            videoInput.value = '';
-            reviewRequirements.value = '';
-            keywordInput.value = '';
-            renderVideoList();
-            updateStartButton();
-            resultsContent.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">📊</div>
-                    <div class="empty-title">暂无审核结果</div>
-                    <div class="empty-hint">上传视频并设置检测条件后，点击"开始检测"获取结果</div>
-                </div>
-            `;
-            resultsCount.textContent = '共 0 个视频';
-            processingTimeEl.textContent = '0s';
-        }
-
-        // 筛选结果
-        function filterResults(type) {
-            filterType = type;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.filter-btn[onclick="filterResults('${type}')"]`).classList.add('active');
-            renderResults(currentResults);
-        }
-
-        // 开始检测
         async function startDetection() {
-            if (selectedVideos.length === 0) {
-                alert('请先上传视频');
+            if (selectedVideos.length === 0) return;
+
+            startBtn.disabled = true;
+            btnText.textContent = '检测中...';
+
+            const startTime = Date.now();
+            const results = [];
+
+            for (let i = 0; i < selectedVideos.length; i++) {
+                const video = selectedVideos[i];
+                try {
+                    const result = await processVideo(video, i + 1, selectedVideos.length);
+                    results.push(result);
+                } catch (error) {
+                    results.push({
+                        name: video.name,
+                        status: 'fail',
+                        aiReply: `检测失败: ${error.message}`,
+                        timestamps: []
+                    });
+                }
+            }
+
+            currentResults = results;
+            processedCount += results.length;
+            processedCountEl.textContent = processedCount;
+
+            const endTime = Date.now();
+            const elapsed = Math.round((endTime - startTime) / 1000);
+            processingTimeEl.textContent = `${elapsed}s`;
+
+            renderResults(results);
+            startBtn.disabled = false;
+            btnText.textContent = '开始检测';
+        }
+
+        async function processVideo(video, current, total) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('video', video);
+
+                if (currentMode === 'review') {
+                    formData.append('requirements', reviewRequirements.value);
+                } else if (currentMode === 'keyword') {
+                    formData.append('keywords', keywordInput.value);
+                } else if (currentMode === 'batch') {
+                    formData.append('requirements', batchRequirements.value);
+                }
+                formData.append('mode', currentMode);
+
+                fetch('/api/analyze-video', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.detail || err.error || '请求失败');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.error || data.detail) {
+                        reject(new Error(data.error || data.detail));
+                    } else {
+                        resolve({
+                            name: video.name,
+                            status: data.status || (data.pass ? 'pass' : 'fail'),
+                            score: data.score,
+                            aiReply: data.analysis || data.result || data.message || '检测完成',
+                            timestamps: data.timestamps || []
+                        });
+                    }
+                })
+                .catch(error => reject(error));
+            });
+        }
+
+        function renderResults(results) {
+            if (results.length === 0) {
+                resultsContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📈</div>
+                        <div class="empty-title">暂无审核结果</div>
+                        <div class="empty-hint">上传视频并设置检测条件后，点击"开始检测"获取结果</div>
+                    </div>
+                `;
+                resultsCount.textContent = '共 0 个视频';
                 return;
             }
 
-            btnText.textContent = '检测中...';
-            startBtn.disabled = true;
-            const startTime = Date.now();
-
-            resultsContent.innerHTML = `
-                <div class="loading-container">
-                    <div class="loading-spinner"></div>
-                    <div class="loading-text">正在分析视频...</div>
-                    <div class="loading-progress">
-                        <div class="loading-bar"></div>
-                    </div>
-                </div>
-            `;
-
-            const results = [];
-            const totalVideos = selectedVideos.length;
-
-            try {
-                for (let i = 0; i < totalVideos; i++) {
-                    const video = selectedVideos[i];
-                    const progress = ((i + 1) / totalVideos * 100).toFixed(0);
-                    
-                    resultsContent.innerHTML = `
-                        <div class="loading-container">
-                            <div class="loading-spinner"></div>
-                            <div class="loading-text">正在检测第 ${i + 1}/${totalVideos} 个视频...</div>
-                            <div style="width: 200px; text-align: center; margin-top: 8px; font-size: 13px; color: #64748b;">${progress}%</div>
-                            <div class="loading-progress">
-                                <div class="loading-bar" style="width: ${progress}%; animation: none;"></div>
-                            </div>
-                        </div>
-                    `;
-
-                    try {
-                        const formData = new FormData();
-                        
-                        if (currentMode === 'review' || currentMode === 'batch') {
-                            formData.append('requirements', reviewRequirements.value.trim());
-                        } else if (currentMode === 'keyword') {
-                            const keywords = keywordInput.value.split(',').map(k => k.trim()).filter(k => k);
-                            formData.append('keywords', JSON.stringify(keywords));
-                        }
-                        
-                        formData.append('video', video);
-
-                        const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 300000);
-
-                        const endpoint = currentMode === 'keyword' ? '/api/detect-keywords' : '/api/review-video';
-                        const response = await fetch(endpoint, {
-                            method: 'POST',
-                            body: formData,
-                            signal: controller.signal
-                        });
-
-                        clearTimeout(timeoutId);
-
-                        if (!response.ok) {
-                            let errorData;
-                            try {
-                                errorData = await response.json();
-                            } catch {
-                                errorData = { detail: `HTTP错误: ${response.status}` };
-                            }
-                            results.push({
-                                name: video.name,
-                                status: 'fail',
-                                error: errorData.detail || '检测失败'
-                            });
-                        } else {
-                            const data = await response.json();
-                            
-                            if (currentMode === 'keyword') {
-                                const totalMatches = data.results?.reduce((sum, kw) => sum + (kw.matches?.length || 0), 0) || 0;
-                                results.push({
-                                    name: video.name,
-                                    status: totalMatches > 0 ? 'fail' : 'pass',
-                                    result: `检测到 ${totalMatches} 处关键词匹配`,
-                                    matches: data.results || [],
-                                    score: totalMatches > 0 ? Math.max(0, 100 - totalMatches * 10) : 100
-                                });
-                            } else {
-                                results.push({
-                                    name: video.name,
-                                    status: data.pass ? 'pass' : 'fail',
-                                    result: data.result || '',
-                                    reasons: data.reasons || [],
-                                    issues: data.issues || [],
-                                    score: data.pass ? 100 : Math.max(0, 100 - (data.issues?.length || 0) * 20)
-                                });
-                            }
-                        }
-                    } catch (error) {
-                        results.push({
-                            name: video.name,
-                            status: 'fail',
-                            error: error.name === 'AbortError' ? '检测超时' : error.message,
-                            score: 0
-                        });
-                    }
-                }
-
-                const endTime = Date.now();
-                const duration = Math.round((endTime - startTime) / 1000);
-                processingTimeEl.textContent = `${duration}s`;
-
-                processedCount += totalVideos;
-                processedCountEl.textContent = processedCount;
-                currentResults = results;
-                renderResults(results);
-
-            } catch (error) {
-                resultsContent.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">❌</div>
-                        <div class="empty-title">检测失败</div>
-                        <div class="empty-hint">${error.message}</div>
-                    </div>
-                `;
-            } finally {
-                btnText.textContent = '开始检测';
-                startBtn.disabled = false;
-            }
-        }
-
-        // 渲染检测结果
-        function renderResults(results) {
-            let filteredResults = results;
-            if (filterType === 'pass') {
-                filteredResults = results.filter(r => r.status === 'pass');
-            } else if (filterType === 'fail') {
-                filteredResults = results.filter(r => r.status === 'fail');
-            }
+            const filteredResults = filterType === 'all' ? results : results.filter(r => r.status === filterType);
 
             const passedCount = results.filter(r => r.status === 'pass').length;
             const failedCount = results.filter(r => r.status === 'fail').length;
-            const total = results.length;
-            const passRate = total > 0 ? ((passedCount / total) * 100).toFixed(1) : 0;
+            const passRate = results.length > 0 ? Math.round((passedCount / results.length) * 100) : 0;
 
-            resultsCount.textContent = `共 ${filteredResults.length} 个视频`;
-
-            let html = '';
-            if (total > 0) {
-                html = `
-                    <div class="stats-panel">
-                        <div class="stat-card total">
-                            <div class="stat-icon">📹</div>
-                            <div class="stat-value">${total}</div>
-                            <div class="stat-label">总视频数</div>
-                        </div>
-                        <div class="stat-card pass">
-                            <div class="stat-icon">✅</div>
-                            <div class="stat-value">${passedCount}</div>
-                            <div class="stat-label">通过</div>
-                        </div>
-                        <div class="stat-card fail">
-                            <div class="stat-icon">❌</div>
-                            <div class="stat-value">${failedCount}</div>
-                            <div class="stat-label">不通过</div>
-                        </div>
-                        <div class="stat-card rate">
-                            <div class="stat-icon">📊</div>
-                            <div class="stat-value">${passRate}%</div>
-                            <div class="stat-label">通过率</div>
-                        </div>
+            let html = `
+                <div class="stats-panel">
+                    <div class="stat-card total">
+                        <div class="stat-icon">🎥</div>
+                        <div class="stat-value">${results.length}</div>
+                        <div class="stat-label">总视频数</div>
                     </div>
-                `;
-            }
+                    <div class="stat-card pass">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-value">${passedCount}</div>
+                        <div class="stat-label">通过</div>
+                    </div>
+                    <div class="stat-card fail">
+                        <div class="stat-icon">❌</div>
+                        <div class="stat-value">${failedCount}</div>
+                        <div class="stat-label">不通过</div>
+                    </div>
+                    <div class="stat-card rate">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-value">${passRate}%</div>
+                        <div class="stat-label">通过率</div>
+                    </div>
+                </div>
+            `;
 
             if (filteredResults.length === 0) {
                 html += `
                     <div class="empty-state">
-                        <div class="empty-icon">📊</div>
+                        <div class="empty-icon">🔍</div>
                         <div class="empty-title">暂无匹配结果</div>
                         <div class="empty-hint">当前筛选条件下没有找到匹配的审核结果</div>
                     </div>
@@ -1588,76 +935,29 @@
             }
 
             filteredResults.forEach(result => {
-                let cardContent = '';
-                
-                if (result.error) {
-                    cardContent = `
-                        <div class="result-section">
-                            <div class="result-section-title">错误信息</div>
-                            <div class="result-section-content">${result.error}</div>
-                        </div>
-                    `;
-                } else if (currentMode === 'keyword') {
-                    cardContent = `
-                        <div class="result-section">
-                            <div class="result-section-title">检测结果</div>
-                            <div class="result-section-content">${result.result}</div>
-                        </div>
-                    `;
-                    
-                    if (result.matches && result.matches.length > 0) {
-                        cardContent += `
-                            <div class="result-section">
-                                <div class="result-section-title">关键词匹配详情</div>
-                                <ul class="result-list">
-                        `;
-                        result.matches.forEach(kw => {
-                            const matchCount = kw.matches?.length || 0;
-                            cardContent += `
-                                <li class="result-list-item ${matchCount > 0 ? 'warning' : ''}">
-                                    <strong>${kw.keyword}</strong>: ${matchCount} 次匹配
-                                    ${kw.matches?.map((m, i) => `<br>  • 时间戳 ${i + 1}: ${m}`).join('') || ''}
-                                </li>
-                            `;
-                        });
-                        cardContent += `</ul></div>`;
-                    }
-                } else {
-                    cardContent = `
-                        <div class="result-section">
-                            <div class="result-section-title">评估结果</div>
-                            <div class="result-section-content">${result.result}</div>
-                        </div>
-                    `;
+                let cardContent = `
+                    <div class="result-section">
+                        <div class="result-section-title">AI 分析结果</div>
+                        <div class="result-text">${result.aiReply}</div>
+                    </div>
+                `;
 
-                    if (result.status === 'pass' && result.reasons && result.reasons.length > 0) {
-                        cardContent += `
-                            <div class="result-section">
-                                <div class="result-section-title">通过理由</div>
-                                <ul class="result-list">
-                        `;
-                        result.reasons.forEach(reason => {
-                            cardContent += `<li class="result-list-item success">${reason}</li>`;
-                        });
-                        cardContent += `</ul></div>`;
-                    } else if (result.status === 'fail' && result.issues && result.issues.length > 0) {
-                        cardContent += `
-                            <div class="result-section">
-                                <div class="result-section-title">问题列表</div>
-                                <ul class="result-list">
-                        `;
-                        result.issues.forEach(issue => {
-                            cardContent += `<li class="result-list-item error">${issue}</li>`;
-                        });
-                        cardContent += `</ul></div>`;
-                    }
+                if (result.timestamps && result.timestamps.length > 0) {
+                    cardContent += `
+                        <div class="result-section">
+                            <div class="result-section-title">检测到的关键词时间戳</div>
+                            <div class="timestamps-list">
+                                ${result.timestamps.map(t => `<span class="timestamp-tag">${t.keyword}: ${t.time}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
                 }
 
                 html += `
                     <div class="result-card ${result.status}">
                         <div class="result-header">
                             <div class="result-video-info">
-                                <div class="result-video-icon">🎬</div>
+                                <div class="result-video-icon">🎥</div>
                                 <div class="result-video-detail">
                                     <div class="result-video-name">${result.name}</div>
                                     <div class="result-video-meta">检测模式: ${currentMode === 'keyword' ? '关键词检测' : '合规检测'}</div>
@@ -1676,73 +976,65 @@
             });
 
             resultsContent.innerHTML = html;
+            resultsCount.textContent = `共 ${filteredResults.length} 个视频`;
         }
 
-        // 生成报告
+        function setFilter(filter) {
+            filterType = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.filter-btn[onclick="setFilter('${filter}')"]`).classList.add('active');
+            renderResults(currentResults);
+        }
+
+        function clearAll() {
+            selectedVideos = [];
+            currentResults = [];
+            videoInput.value = '';
+            reviewRequirements.value = '';
+            keywordInput.value = '';
+            batchRequirements.value = '';
+            renderVideoList();
+            updateStartButton();
+            resultsContent.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📈</div>
+                    <div class="empty-title">暂无审核结果</div>
+                    <div class="empty-hint">上传视频并设置检测条件后，点击"开始检测"获取结果</div>
+                </div>
+            `;
+            resultsCount.textContent = '共 0 个视频';
+            processingTimeEl.textContent = '0s';
+            processedCount = 0;
+            processedCountEl.textContent = '0';
+        }
+
         function generateReport() {
             if (currentResults.length === 0) {
-                alert('暂无审核结果可生成报告');
+                alert('暂无审核结果可导出');
                 return;
             }
 
-            const now = new Date();
-            
-            // 创建CSV内容
-            let csvContent = '\uFEFF'; // BOM for UTF-8
-            csvContent += '视频名称,审核结果,AI回复\n';
-            
-            currentResults.forEach((result) => {
-                let aiReply = '';
-                
-                if (result.error) {
-                    aiReply = result.error;
-                } else if (currentMode === 'keyword') {
-                    aiReply = result.result || '';
-                    if (result.matches && result.matches.length > 0) {
-                        const matchDetails = result.matches.map(kw => 
-                            `${kw.keyword}: ${kw.matches?.length || 0}次`
-                        ).join('; ');
-                        if (matchDetails) {
-                            aiReply += ` (${matchDetails})`;
-                        }
-                    }
-                } else {
-                    aiReply = result.result || '';
-                    if (result.reasons && result.reasons.length > 0) {
-                        aiReply += '; 通过理由: ' + result.reasons.join('; ');
-                    }
-                    if (result.issues && result.issues.length > 0) {
-                        aiReply += '; 问题: ' + result.issues.join('; ');
-                    }
-                }
-                
-                // 转义特殊字符
-                const name = result.name.replace(/"/g, '""');
+            let csv = '视频名称,审核结果,AI回复\n';
+            currentResults.forEach(result => {
+                const name = `"${result.name.replace(/"/g, '""')}"`;
                 const status = result.status === 'pass' ? '通过' : '不通过';
-                const reply = aiReply.replace(/"/g, '""');
-                
-                csvContent += `"${name}","${status}","${reply}"\n`;
+                const reply = `"${(result.aiReply || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+                csv += `${name},${status},${reply}\n`;
             });
 
-            // 创建下载
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `视频审核报告_${now.toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        // 打开设置（目前为占位功能）
-        function openSettings() {
-            alert('设置功能开发中...\n\n目前支持的功能:\n• 视频上传与检测\n• 批量处理\n• 报告导出');
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `视频审核报告_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         reviewRequirements.addEventListener('input', updateStartButton);
         keywordInput.addEventListener('input', updateStartButton);
+        batchRequirements.addEventListener('input', updateStartButton);
     </script>
 </body>
 </html>

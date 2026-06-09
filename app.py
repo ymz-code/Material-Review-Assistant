@@ -37,8 +37,8 @@ UPLOAD_DIR = os.path.join(os.path.dirname(__file__), "static", "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # 配置
-MAX_VIDEO_SIZE = 50 * 1024 * 1024  # 50MB
-REQUEST_TIMEOUT = 300  # 5分钟
+MAX_VIDEO_SIZE = 512 * 1024 * 1024  # 512MB
+REQUEST_TIMEOUT = 600  # 10分钟（增加超时时间以支持大文件）
 
 api_key = os.getenv('ARK_API_KEY')
 
@@ -396,6 +396,198 @@ async def review_video(
     except Exception as e:
         logger.error(f"视频合规检测错误: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"视频检测失败: {str(e)}")
+
+@app.post("/api/analyze-video")
+async def analyze_video(
+    mode: str = Form(...),
+    requirements: str = Form(None),
+    keywords: str = Form(None),
+    video: UploadFile = File(...)
+):
+    logger.info(f"开始视频分析: {video.filename}, 模式: {mode}")
+    
+    try:
+        # 检查文件大小
+        content = await video.read()
+        file_size = len(content)
+        
+        if file_size > MAX_VIDEO_SIZE:
+            raise HTTPException(status_code=413, detail=f"文件大小超过限制（最大 {MAX_VIDEO_SIZE//(1024*1024)}MB）")
+        
+        # 保存上传的视频文件
+        file_ext = os.path.splitext(video.filename)[1]
+        unique_filename = f"{uuid.uuid4()}{file_ext}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+        
+        # 异步写入文件
+        async with aiofiles.open(file_path, 'wb') as f:
+            await f.write(content)
+        
+        logger.info(f"视频文件已保存: {file_path}")
+        
+        client = get_client()
+        
+        # 使用官方推荐的 Files API 异步上传视频
+        logger.info("开始上传视频到火山引擎")
+        with open(file_path, 'rb') as video_file:
+            uploaded_file = await client.files.create(
+                file=video_file,
+                purpose="user_data",
+                preprocess_configs={
+                    "video": {
+                        "fps": 1  # 定义视频采样帧率，默认1.0
+                    }
+                }
+            )
+            logger.info(f"文件上传成功: {uploaded_file.id}")
+            
+            # 等待文件处理完成（官方推荐方法）
+            logger.info("等待文件处理完成...")
+            await client.files.wait_for_processing(uploaded_file.id)
+            logger.info(f"文件处理完成: {uploaded_file.id}")
+        
+        # 根据模式构建不同的提示词
+        if mode == 'keyword':
+            # 关键词检测
+            if not keywords:
+                raise HTTPException(status_code=400, detail="请提供关键词")
+            
+            keyword_list = [k.strip() for k in keywords.split(',') if k.strip()]
+            if not keyword_list:
+                raise HTTPException(status_code=400, detail="请提供至少一个关键词")
+            
+            keywords_str = "、".join(keyword_list)
+            prompt = f"""请分析这个视频，检测以下关键词的出现位置：
+关键词：{keywords_str}
+
+对于每个检测到的关键词，请提供：
+1. 出现的大致时间点
+2. 出现的上下文内容
+
+请使用以下JSON格式返回结果：
+{{
+    "timestamps": [
+        {{
+            "keyword": "关键词",
+            "time": "时间点"
+        }}
+    ],
+    "analysis": "分析总结"
+}}
+
+注意：
+- 如果某个关键词未检测到，可以不列出
+- 时间点请使用 MM:SS 或 HH:MM:SS 格式
+- 如果无法准确判断时间点，请说明原因
+- 只返回JSON格式，不要有其他文字"""
+        else:
+            # 合规检测（review 和 batch 模式）
+            if not requirements:
+                raise HTTPException(status_code=400, detail="请提供审核标准")
+            
+            prompt = f"""请分析这个视频，根据以下要求进行评估：
+
+检测要求：
+{requirements}
+
+请按照以下要求进行分析：
+1. 判断视频是否满足上述所有要求
+2. 如果视频满足要求，返回"通过"
+3. 如果视频不满足要求，返回"不通过"，并列出具体问题
+4. 提供详细的评估理由
+
+请使用以下JSON格式返回结果：
+{{
+    "pass": true/false,
+    "status": "通过/不通过",
+    "score": 0-100,
+    "analysis": "评估结果描述和理由",
+    "issues": ["问题1", "问题2", ...]
+}}
+
+注意：
+- pass字段必须是布尔值
+- score字段是0-100的分数
+- 如果pass为true，issues数组可以为空
+- 如果pass为false，列出具体问题
+- 只返回JSON格式，不要有其他文字"""
+        
+        # 使用 file_id 调用豆包API分析视频
+        logger.info(f"开始调用豆包API，模式: {mode}")
+        response = await client.responses.create(
+            model="doubao-seed-2-0-pro-260215",
+            input=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "input_video",
+                            "file_id": uploaded_file.id
+                        },
+                        {
+                            "type": "input_text",
+                            "text": prompt
+                        }
+                    ]
+                }
+            ]
+        )
+        logger.info(f"视频分析完成，模式: {mode}")
+        
+        # 提取响应文本
+        answer = ""
+        for item in response.output:
+            if hasattr(item, 'content'):
+                for content_item in item.content:
+                    if hasattr(content_item, 'text'):
+                        answer += content_item.text
+        
+        logger.info(f"AI响应: {answer[:500]}...")
+        
+        # 尝试解析JSON响应
+        try:
+            import re
+            json_match = re.search(r'\{[\s\S]*\}', answer)
+            if json_match:
+                result = json.loads(json_match.group())
+                return result
+            else:
+                # 如果无法解析为JSON，返回原始文本
+                if mode == 'keyword':
+                    return {
+                        "timestamps": [],
+                        "analysis": answer
+                    }
+                else:
+                    return {
+                        "pass": False,
+                        "status": "不通过",
+                        "score": 0,
+                        "analysis": answer,
+                        "issues": ["无法解析AI响应为JSON格式"]
+                    }
+        except json.JSONDecodeError:
+            # JSON解析失败，返回原始文本
+            if mode == 'keyword':
+                return {
+                    "timestamps": [],
+                    "analysis": answer
+                }
+            else:
+                return {
+                    "pass": False,
+                    "status": "不通过",
+                    "score": 0,
+                    "analysis": answer,
+                    "issues": ["JSON解析失败"]
+                }
+            
+    except HTTPException as e:
+        logger.error(f"HTTP错误: {e.detail}")
+        raise
+    except Exception as e:
+        logger.error(f"视频分析错误: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"视频分析失败: {str(e)}")
 
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
