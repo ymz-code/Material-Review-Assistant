@@ -17,3 +17,9 @@
 
 ### 3. 报告导出界面
 <img width="1912" height="956" alt="报告导出" src="https://github.com/user-attachments/assets/1b577fca-9bab-430b-82f3-095ad7aafc9e" />
+
+## 🚀 安装与启动
+###  克隆仓库
+```bash
+git clone https://gitcode.com/ymz-code/Material-Review-Assistant.git
+cd Material-Review-Assistant
